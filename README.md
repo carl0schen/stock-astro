@@ -1,43 +1,37 @@
-# Astro Starter Kit: Minimal
+## 關於本站
 
-```sh
-npm create astro@latest -- --template minimal
-```
+利用 AI 彙整台股盤後資訊，快速掌握市場動向。
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+### 資料來源
 
-## 🚀 Project Structure
+- **日報**
+    - 上市投信買賣超：感謝 PTT 網友整理
+    - 上市外資買賣超：感謝 PTT 網友整理
+    - 三大法人買賣金額統計表：感謝 PTT 網友整理
+- **週報**
+    - 上市投信買賣超：Yahoo 奇摩股市
+    - 上市外資買賣超：Yahoo 奇摩股市
+    - 三大法人買賣金額統計表：臺灣證券交易所
+- **月報**
+    - 上市投信買賣超：臺灣證券交易所
+    - 上市外資買賣超：臺灣證券交易所
+    - 三大法人買賣金額統計表：臺灣證券交易所
 
-Inside of your Astro project, you'll see the following folders and files:
+### 搜尋與彙整
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+如需查詢歷史資料，可使用 [搜尋頁面](https://stock.may.tw/search/) 輸入日期，或是前往 [GitHub](https://github.com/carl0schen/astro-stock) 直接檢視原始檔案。
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+### 聯絡我們
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+如果資料有誤，歡迎來信告知：[聯絡頁面](https://stock.may.tw/contact/)
 
-Any static assets, like images, can be placed in the `public/` directory.
+### 文章訂閱
 
-## 🧞 Commands
+- **RSS 訂閱：** [https://stock.may.tw/rss.xml](https://stock.may.tw/rss.xml)
+- **電子郵件訂閱：** 使用 [Feedrabbit](https://feedrabbit.com/) 服務。
+- **Telegram 訂閱：** 使用 [RSS-to-Telegram-Bot](https://t.me/RSStT_Bot)。
 
-All commands are run from the root of the project, from a terminal:
+### 盤後新聞
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+來源：Yahoo 奇摩股市（[台股盤後](https://tw.stock.yahoo.com/rss?q=台股盤後) / [美股盤後](https://tw.stock.yahoo.com/rss?q=美股盤後)）  
+網址：[盤後新聞](https://stock.may.tw/news/)

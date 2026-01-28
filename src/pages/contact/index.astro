@@ -1,0 +1,112 @@
+---
+// src/pages/contact/index.astro
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="聯絡我們 - 法人買賣超整理">
+  <div class="form-wrapper">
+    <div class="form-container">
+      <h2>聯絡我們</h2>
+      <p class="info-text">如果資料有誤，歡迎透過下方表單聯繫。</p>
+      
+      <form action="https://api.staticforms.xyz/submit" method="POST">
+          
+          <input type="hidden" name="accessKey" value="sf_2f7f5630gckb73dd6g1g2jmd">
+          <input type="hidden" name="redirectTo" value="https://stock.may.tw/contact/thanks">
+          <input type="hidden" name="subject" value="來自 stock.may.tw 的新聯絡訊息">
+          
+          <div class="ohnohoney">
+              <label for="honeypot">請勿填寫此欄位</label>
+              <input type="text" id="honeypot" name="honeypot" autocomplete="off">
+          </div>
+
+          <div class="form-group">
+              <label for="name" class="form-label">名稱 <span class="required-mark">*</span></label>
+              <input type="text" id="name" name="name" class="form-input" placeholder="您的名稱" required>
+          </div>
+
+          <div class="form-group">
+              <label for="email" class="form-label">電子信箱 <span class="required-mark">*</span></label>
+              <input type="email" id="email" name="email" class="form-input" placeholder="name@example.com" required>
+          </div>
+
+          <div class="form-group">
+              <label for="message" class="form-label">訊息內容 <span class="required-mark">*</span></label>
+              <textarea id="message" name="message" class="form-textarea" placeholder="請輸入您的訊息..." required></textarea>
+          </div>
+
+          <button type="submit" class="submit-button">送出訊息</button>
+      </form>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  /* 讓表單在畫面置中 */
+  .form-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+  }
+
+  .form-container {
+    text-align: center;
+    padding: 2.5rem;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 400px;
+  }
+
+  h2 { margin-top: 0; margin-bottom: 1rem; font-size: 1.5rem; }
+  .info-text { font-size: 0.9rem; color: #666; margin-bottom: 1.5rem; }
+
+  .form-group { margin-bottom: 1rem; text-align: left; }
+  .form-label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; color: #333; }
+  .required-mark { color: #d73a49; }
+
+  .form-input, .form-textarea {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box; /* 重要：防止 padding 撐爆寬度 */
+    font-family: inherit;
+  }
+
+  .form-textarea { height: 120px; resize: vertical; }
+
+  .form-input:focus, .form-textarea:focus {
+    border-color: #0366d6;
+    outline: none;
+  }
+
+  .submit-button {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1rem;
+    background-color: #0366d6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    transition: background-color 0.2s;
+  }
+  .submit-button:hover { background-color: #024ea4; }
+
+  /* 隱藏 Honeypot */
+  .ohnohoney {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 0;
+    width: 0;
+    z-index: -1;
+  }
+</style>

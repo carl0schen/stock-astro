@@ -1,0 +1,7 @@
+/contact/thanks*
+  X-Robots-Tag: noindex, nofollow
+/*.md
+  X-Robots-Tag: noindex
+/*
+  ! Access-Control-Allow-Origin
+  X-Frame-Options: DENY

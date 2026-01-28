@@ -1,0 +1,66 @@
+---
+// src/pages/[year]/monthly/[month]/index.astro
+import { getCollection } from 'astro:content';
+import Layout from '../../../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('monthly');
+  
+  // 1. 排序
+  const sortedPosts = allPosts.sort((a, b) => a.slug.localeCompare(b.slug));
+
+  return sortedPosts.map((post, index) => {
+    // 2. 解析 Slug (例如: 2025/M11)
+    const parts = post.slug.split('/');
+    const year = parts[0];
+    const rawMonth = parts[1]; // 這裡是 M11
+
+    // 3. 【重要】把 M 拿掉，變成 11
+    const month = rawMonth.replace(/[mM]/, '');
+
+    // 4. 找出鄰居
+    const prevPost = index > 0 ? sortedPosts[index - 1] : null;
+    const nextPost = index < sortedPosts.length - 1 ? sortedPosts[index + 1] : null;
+
+    return {
+      // 5. 【重要】這裡的 key 必須跟檔名 [year], [month] 一模一樣
+      params: { year, month }, 
+      props: { 
+        post, 
+        prevPost, 
+        nextPost 
+      },
+    };
+  });
+}
+
+const { post, prevPost, nextPost } = Astro.props;
+const { Content } = await post.render();
+
+// 輔助函式：產生連結
+function getUrl(slug) {
+   const [y, m] = slug.split('/');
+   return `/${y}/monthly/${m.replace(/[mM]/, '')}/`;
+}
+---
+
+<Layout title={post.data.title} date={post.data.date}>
+  <Content />
+
+  <div class="post-nav">
+    <div>
+      {prevPost && (
+        <a href={getUrl(prevPost.slug)}>
+           ← {prevPost.data.title}
+        </a>
+      )}
+    </div>
+    <div>
+      {nextPost && (
+        <a href={getUrl(nextPost.slug)}>
+          {nextPost.data.title} →
+        </a>
+      )}
+    </div>
+  </div>
+</Layout>

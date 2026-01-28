@@ -1,0 +1,188 @@
+---
+// src/pages/index.astro
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+// 1. 抓取資料並排序 (只取最新 5 筆)
+const allDaily = (await getCollection('daily'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 5);
+
+const allWeekly = (await getCollection('weekly'))
+  .sort((a, b) => b.slug.localeCompare(a.slug))
+  .slice(0, 5);
+
+const allMonthly = (await getCollection('monthly'))
+  .sort((a, b) => b.slug.localeCompare(a.slug))
+  .slice(0, 5);
+
+// 2. 輔助函式：產生連結 (確保跟內頁邏輯一致)
+function getDailyUrl(slug: string) {
+  return `/${slug}/`;
+}
+
+function getWeeklyUrl(slug: string) {
+  const [year, week] = slug.split('/');
+  // 去掉 W (大小寫通吃)
+  return `/${year}/weekly/${week.replace(/[wW]/, '')}/`;
+}
+
+function getMonthlyUrl(slug: string) {
+  const [year, month] = slug.split('/');
+  // 去掉 M (大小寫通吃)
+  return `/${year}/monthly/${month.replace(/[mM]/, '')}/`;
+}
+---
+
+<Layout title="台股盤後 - 法人買賣超整理">
+  
+  <section class="intro-section">
+    <h2>關於本站</h2>
+    <p>利用 AI 彙整台股盤後資訊，快速掌握市場動向。</p>
+  </section>
+
+  <section class="latest-posts">
+    <div class="post-group">
+      <h3>最新日報</h3>
+      <ul>
+        {allDaily.map((post) => (
+          <li>
+            <a href={getDailyUrl(post.slug)}>
+              {post.data.title}
+            </a>
+            <span class="date">{new Date(post.data.date).toLocaleDateString()}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="post-group">
+      <h3>最新週報</h3>
+      <ul>
+        {allWeekly.map((post) => (
+          <li>
+            <a href={getWeeklyUrl(post.slug)}>{post.data.title}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="post-group">
+      <h3>最新月報</h3>
+      <ul>
+        {allMonthly.map((post) => (
+          <li>
+            <a href={getMonthlyUrl(post.slug)}>{post.data.title}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <hr />
+
+  <section class="info-section">
+    <h3>資料來源</h3>
+    <ul>
+      <li><strong>日報</strong>
+        <ul>
+          <li>上市投信買賣超：感謝 PTT 網友整理</li>
+          <li>上市外資買賣超：感謝 PTT 網友整理</li>
+          <li>三大法人買賣金額統計表：感謝 PTT 網友整理</li>
+        </ul>
+      </li>
+      <li><strong>週報</strong>
+        <ul>
+          <li>上市投信買賣超：Yahoo 奇摩股市</li>
+          <li>上市外資買賣超：Yahoo 奇摩股市</li>
+          <li>三大法人買賣金額統計表：臺灣證券交易所</li>
+        </ul>
+      </li>
+      <li><strong>月報</strong>
+        <ul>
+          <li>上市投信買賣超：臺灣證券交易所</li>
+          <li>上市外資買賣超：臺灣證券交易所</li>
+          <li>三大法人買賣金額統計表：臺灣證券交易所</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h3>搜尋與彙整</h3>
+    <p>
+      如需查詢歷史資料，可使用 <a href="/search/">搜尋頁面</a> 輸入日期，或是前往 <a href="https://github.com/carl0schen/stock" target="_blank">GitHub</a> 直接檢視原始檔案。
+    </p>
+
+    <h3>聯絡我們</h3>
+    <p>如果資料有誤，歡迎來信告知：<a href="/contact/">聯絡頁面</a></p>
+
+    <h3>文章訂閱</h3>
+    <ul>
+      <li><strong>RSS 訂閱：</strong> <a href="/rss.xml">https://stock.may.tw/rss.xml</a></li>
+      <li><strong>電子郵件訂閱：</strong> 使用 <a href="https://feedrabbit.com/" target="_blank">Feedrabbit</a> 服務。</li>
+      <li><strong>Telegram 訂閱：</strong> 使用 <a href="https://t.me/RSStT_Bot" target="_blank">RSS-to-Telegram-Bot</a>。</li>
+    </ul>
+
+    <h3>盤後新聞</h3>
+    <p>
+      來源：Yahoo 奇摩股市（<a href="https://tw.stock.yahoo.com/rss?q=台股盤後" target="_blank">台股盤後</a> / <a href="https://tw.stock.yahoo.com/rss?q=美股盤後" target="_blank">美股盤後</a>）<br>
+      網址：<a href="/news/">盤後新聞</a>
+    </p>
+  </section>
+
+</Layout>
+
+<style>
+  /* 讓首頁的標題稍微明顯一點 */
+  h2 { border-bottom: 2px solid #eaeaea; padding-bottom: 0.5rem; margin-top: 0; }
+  h3 { margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+  
+  /* 動態列表的樣式 */
+  .latest-posts {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin: 2rem 0;
+    background-color: #f6f8fa; /* 淺灰背景區隔 */
+    padding: 1.5rem;
+    border-radius: 6px;
+  }
+
+  /* 桌機版變成三欄 */
+  @media (min-width: 768px) {
+    .latest-posts {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .post-group ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .post-group li {
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .post-group a {
+    text-decoration: none;
+    color: #0366d6;
+  }
+  .post-group a:hover {
+    text-decoration: underline;
+  }
+
+  .date {
+    display: block;
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 2px;
+  }
+
+  hr {
+    margin: 2rem 0;
+    border: 0;
+    border-top: 1px solid #eaeaea;
+  }
+</style>

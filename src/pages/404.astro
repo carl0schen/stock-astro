@@ -1,0 +1,50 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="404 找不到頁面">
+  <div class="error-container">
+    <div class="error-code">404</div>
+    <div class="error-message">抱歉，找不到您要的頁面</div>
+    <a href="/" class="back-home">回到首頁</a>
+  </div>
+</Layout>
+
+<style>
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    text-align: center;
+  }
+
+  .error-code {
+    font-size: 6rem;
+    font-weight: bold;
+    color: #eaeaea;
+    line-height: 1;
+  }
+
+  .error-message {
+    font-size: 1.5rem;
+    color: #333;
+    margin: 1rem 0 2rem;
+    font-weight: bold;
+  }
+
+  .back-home {
+    padding: 0.8rem 1.5rem;
+    background-color: #0366d6;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+  }
+
+  .back-home:hover {
+    background-color: #024ea4;
+  }
+</style>

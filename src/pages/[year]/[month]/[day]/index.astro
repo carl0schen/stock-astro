@@ -1,0 +1,64 @@
+---
+// src/pages/[year]/[month]/[day]/index.astro
+import { getCollection } from 'astro:content';
+import Layout from '../../../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  // 1. 抓出所有日報
+  const allPosts = await getCollection('daily');
+  
+  // 2. 排序：依照日期「由舊到新」排好 (舊的在 index 0，新的在後面)
+  // 這樣 index + 1 就會是「下一天 (較新)」，index - 1 是「前一天 (較舊)」
+  const sortedPosts = allPosts.sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf());
+
+  return sortedPosts.map((post, index) => {
+    // 解析網址
+    const [year, month, day] = post.slug.split('/');
+
+    // 3. 找出鄰居
+    // 如果 index > 0，代表有前一篇
+    const prevPost = index > 0 ? sortedPosts[index - 1] : null;
+    // 如果 index < 總數-1，代表有後一篇
+    const nextPost = index < sortedPosts.length - 1 ? sortedPosts[index + 1] : null;
+
+    return {
+      params: { year, month, day },
+      props: { 
+        post, 
+        prevPost, // 把上一篇傳進去
+        nextPost  // 把下一篇傳進去
+      },
+    };
+  });
+}
+
+// 接收傳進來的資料
+const { post, prevPost, nextPost } = Astro.props;
+const { Content } = await post.render();
+
+// 輔助函式：產生連結
+function getUrl(slug: string) {
+  return `/${slug}/`;
+}
+---
+
+<Layout title={post.data.title} date={post.data.date}>
+  <Content />
+
+  <div class="post-nav">
+    <div>
+      {prevPost && (
+        <a href={getUrl(prevPost.slug)}>
+           ← {prevPost.data.title}
+        </a>
+      )}
+    </div>
+    <div>
+      {nextPost && (
+        <a href={getUrl(nextPost.slug)}>
+          {nextPost.data.title} →
+        </a>
+      )}
+    </div>
+  </div>
+</Layout>

@@ -7,29 +7,26 @@ export async function GET(context) {
   const weekly = await getCollection('weekly');
   const monthly = await getCollection('monthly');
 
-  // --- 輔助函式：當 Markdown 裡沒寫日期時，用檔名推算 (救急用) ---
+  // --- 輔助函式 ---
   
   // 計算週報日期 (該週的週日)
   const calculateWeeklyDate = (year, weekNum) => {
     const y = parseInt(year, 10);
     const w = parseInt(weekNum, 10);
-    // 找出該年 1/1
-    const jan1 = new Date(y, 0, 1);
-    // 找出第一個週日
-    const daysToNextSunday = (7 - jan1.getDay()) % 7;
+    const jan1 = new Date(Date.UTC(y, 0, 1)); // 使用 UTC 建立日期
+    const daysToNextSunday = (7 - jan1.getUTCDay()) % 7;
     const firstSunday = new Date(jan1);
-    firstSunday.setDate(jan1.getDate() + daysToNextSunday);
+    firstSunday.setUTCDate(jan1.getUTCDate() + daysToNextSunday);
     
-    // 推算第 N 週
     const targetDate = new Date(firstSunday);
-    targetDate.setDate(firstSunday.getDate() + (w - 1) * 7);
+    targetDate.setUTCDate(firstSunday.getUTCDate() + (w - 1) * 7);
     return targetDate;
   };
 
   // 計算月報日期 (該月最後一天)
   const calculateMonthlyDate = (year, monthNum) => {
-    // Date(y, m, 0) 會自動取得該月最後一天
-    return new Date(parseInt(year, 10), parseInt(monthNum, 10), 0);
+    // 使用 UTC 建立日期
+    return new Date(Date.UTC(parseInt(year, 10), parseInt(monthNum, 10), 0));
   };
 
   // --- 主邏輯 ---
@@ -41,13 +38,15 @@ export async function GET(context) {
       const displayMonth = parseInt(month, 10);
       const displayDay = parseInt(day, 10);
 
-      // 1. 決定日期來源：有 Frontmatter 用 Frontmatter，沒有則用檔名
+      // 1. 取得日期物件
+      // 如果有 Frontmatter，直接用；沒有則用檔名建立 UTC 日期
       const dateObj = post.data.date 
         ? new Date(post.data.date) 
-        : new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        : new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
       
-      // 2. 設定時間：16:30
-      dateObj.setHours(16, 30, 0, 0);
+      // 2. 強制設定時間：台灣 16:30 = UTC 08:30
+      // 邏輯：16 - 8 = 8
+      dateObj.setUTCHours(16 - 8, 30, 0, 0);
 
       return {
         ...post,
@@ -61,22 +60,19 @@ export async function GET(context) {
     // === 週報 ===
     ...weekly.map(post => {
       const [year, weekSlug] = post.slug.split('/');
-      // 使用 Regex 去掉 W/w，確保拿到純數字
       const weekNum = parseInt(weekSlug.replace(/[wW]/, ''), 10);
       const urlWeek = weekNum.toString().padStart(2, '0');
 
-      // 1. 決定日期來源
       let dateObj;
       if (post.data.date) {
-        // 未來的新文章，讀這行
         dateObj = new Date(post.data.date);
       } else {
-        // 過去的舊文章(沒日期)，自動用算的
         dateObj = calculateWeeklyDate(year, weekNum);
       }
 
-      // 2. 設定時間：20:00 (確保排在同日日報後面)
-      dateObj.setHours(20, 0, 0, 0);
+      // 2. 強制設定時間：台灣 20:00 = UTC 12:00
+      // 邏輯：20 - 8 = 12
+      dateObj.setUTCHours(20 - 8, 0, 0, 0);
 
       return {
         ...post,
@@ -93,7 +89,6 @@ export async function GET(context) {
       const monthNum = parseInt(monthSlug.replace(/[mM]/, ''), 10);
       const urlMonth = monthNum.toString().padStart(2, '0');
 
-      // 1. 決定日期來源
       let dateObj;
       if (post.data.date) {
         dateObj = new Date(post.data.date);
@@ -101,8 +96,9 @@ export async function GET(context) {
         dateObj = calculateMonthlyDate(year, monthNum);
       }
 
-      // 2. 設定時間：21:00 (確保排在同日週報後面)
-      dateObj.setHours(21, 0, 0, 0);
+      // 2. 強制設定時間：台灣 21:00 = UTC 13:00
+      // 邏輯：21 - 8 = 13
+      dateObj.setUTCHours(21 - 8, 0, 0, 0);
 
       return {
         ...post,
@@ -115,7 +111,6 @@ export async function GET(context) {
   ];
 
   // 3. 排序 (新 -> 舊)
-  // 因為所有文章都有了 calculatedDate (不管是讀來的還是算來的)，排序一定會準
   allPosts.sort((a, b) => b.calculatedDate.valueOf() - a.calculatedDate.valueOf());
 
   // 4. 限制最新 20 篇
@@ -127,7 +122,7 @@ export async function GET(context) {
     site: context.site,
     items: limitedPosts.map((post) => ({
       title: post.customTitle,
-      pubDate: post.calculatedDate, // 這是關鍵：使用處理過的時間
+      pubDate: post.calculatedDate, 
       description: post.customDescription, 
       link: post.customLink,               
     })),

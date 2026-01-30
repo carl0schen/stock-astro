@@ -66,11 +66,30 @@ import Layout from '../../layouts/Layout.astro';
     
                         const date = document.createElement('p');
                         date.classList.add('news-date');
-                        date.textContent = new Date(item.pubDate).toLocaleDateString('zh-TW', {
+                        
+                        // 1. 處理 UTC 時區 (跟上一步驟一樣)
+                        let rawDateStr = item.pubDate.replace(/-/g, '/') + ' UTC';
+                        let dateObj = new Date(rawDateStr);
+
+                        // 2. 產生日期字串 (2026年1月30日)
+                        const datePart = dateObj.toLocaleDateString('zh-TW', {
+                            timeZone: 'Asia/Taipei',
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric'
                         });
+
+                        // 3. 產生時間字串 (下午02:30)
+                        const timePart = dateObj.toLocaleTimeString('zh-TW', {
+                            timeZone: 'Asia/Taipei',
+                            hour12: true,      // 預設12小時制，可選24小時制
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+
+                        // 4. 組合在一起 (中間加一個空白)
+                        // 結果範例： "2026年1月30日 下午02:30"
+                        date.textContent = `${datePart} ${timePart}`;
                         
                         const content = document.createElement('p');
                         const cleanDescription = item.description.replace(/<[^>]*>?/gm, ''); 

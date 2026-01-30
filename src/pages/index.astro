@@ -50,7 +50,6 @@ function getMonthlyUrl(slug: string) {
             <a href={getDailyUrl(post.slug)}>
               {post.data.title}
             </a>
-            <span class="date">{new Date(post.data.date).toLocaleDateString()}</span>
           </li>
         ))}
       </ul>
@@ -143,7 +142,7 @@ function getMonthlyUrl(slug: string) {
     gap: 1.5rem;
     margin: 2rem 0;
     background-color: #f6f8fa; /* 淺灰背景區隔 */
-    padding: 1.5rem;
+    padding: 1.5rem 1rem 1.5rem 1.5rem;
     border-radius: 6px;
   }
 
@@ -173,16 +172,19 @@ function getMonthlyUrl(slug: string) {
     text-decoration: underline;
   }
 
-  .date {
-    display: block;
-    font-size: 0.8rem;
-    color: #666;
-    margin-top: 2px;
-  }
-
   hr {
     margin: 2rem 0;
     border: 0;
     border-top: 1px solid #eaeaea;
+  }
+
+  /* 新增：修正首頁灰色區塊的標題上方間距 */
+  .latest-posts h3 {
+    margin-top: 0; 
+  }
+
+  /* 新增(選用)：讓最後一篇文章的底部也不要留白，這樣上下就完全對稱了 */
+  .post-group li:last-child {
+    margin-bottom: 0;
   }
 </style>

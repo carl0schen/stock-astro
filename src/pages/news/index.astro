@@ -64,17 +64,25 @@ import Layout from '../../layouts/Layout.astro';
                         const newsItem = document.createElement('div');
                         newsItem.classList.add('news-item');
                         
-                        const title = document.createElement('h2');
-                        title.textContent = item.title;
+                        // 1. 標題連結
+                        const titleHeader = document.createElement('h2');
+                        const titleLink = document.createElement('a');
+                        
+                        titleLink.href = item.link;
+                        titleLink.textContent = item.title;
+                        titleLink.target = '_blank';
+                        titleLink.rel = 'noopener noreferrer';
+                        titleLink.classList.add('news-title-link'); 
+                        
+                        titleHeader.appendChild(titleLink);
     
+                        // 2. 日期
                         const date = document.createElement('p');
                         date.classList.add('news-date');
                         
-                        // 1. 處理 UTC 時區 (跟上一步驟一樣)
                         let rawDateStr = item.pubDate.replace(/-/g, '/') + ' UTC';
                         let dateObj = new Date(rawDateStr);
 
-                        // 2. 產生日期字串 (2026年1月30日)
                         const datePart = dateObj.toLocaleDateString('zh-TW', {
                             timeZone: 'Asia/Taipei',
                             year: 'numeric',
@@ -82,32 +90,27 @@ import Layout from '../../layouts/Layout.astro';
                             day: 'numeric'
                         });
 
-                        // 3. 產生時間字串 (下午02:30)
                         const timePart = dateObj.toLocaleTimeString('zh-TW', {
                             timeZone: 'Asia/Taipei',
-                            hour12: true,      // 預設12小時制，可選24小時制
+                            hour12: true,
                             hour: '2-digit',
                             minute: '2-digit'
                         });
 
-                        // 4. 組合在一起 (中間加一個空白)
-                        // 結果範例： "2026年1月30日 下午02:30"
                         date.textContent = `${datePart} ${timePart}`;
                         
+                        // 3. 內容摘要
                         const content = document.createElement('p');
-                        const cleanDescription = item.description.replace(/<[^>]*>?/gm, ''); 
-                        content.textContent = cleanDescription;
-    
-                        const link = document.createElement('a');
-                        link.href = item.link;
-                        link.textContent = '閱讀更多...';
-                        link.target = '_blank';
-                        link.rel = 'noopener noreferrer';
+                        content.classList.add('news-summary');
                         
-                        newsItem.appendChild(title);
+                        const cleanDescription = item.description.replace(/<[^>]*>?/gm, ''); 
+                        
+                        // JS 強制加上 ...
+                        content.textContent = cleanDescription.trim() + '...';
+    
+                        newsItem.appendChild(titleHeader);
                         newsItem.appendChild(date);
                         newsItem.appendChild(content);
-                        newsItem.appendChild(link);
                         
                         output.appendChild(newsItem);
                     }
@@ -160,21 +163,15 @@ import Layout from '../../layouts/Layout.astro';
         });
     }
 
-    // --- 新增：回到頂部按鈕邏輯 ---
     const backToTopBtn = document.getElementById('back-to-top');
-
     if (backToTopBtn) {
-        // 監聽捲動事件
         window.addEventListener('scroll', () => {
-            // 如果捲動超過 300px 就顯示，否則隱藏
             if (window.scrollY > 300) {
                 backToTopBtn.classList.add('show');
             } else {
                 backToTopBtn.classList.remove('show');
             }
         });
-
-        // 點擊事件
         backToTopBtn.addEventListener('click', () => {
             window.scrollTo({
                 top: 0,
@@ -236,23 +233,38 @@ import Layout from '../../layouts/Layout.astro';
 
     :global(.news-item) {
         border-bottom: 1px solid #eaeaea;
-        padding-bottom: 1.5em;
+        padding-bottom: 1.2em; 
         margin-bottom: 1.5em;
     }
     
     :global(.news-item:last-child) { border-bottom: none; }
+    
     :global(.news-item h2) {
         font-size: 1.3em;
         font-weight: 600;
-        color: #24292e;
         margin-top: 0;
         margin-bottom: 0.5em;
     }
-    :global(.news-date) { font-size: 0.85em; color: #586069; margin-bottom: 0.8em; }
-    :global(.news-item p) { line-height: 1.6; color: #444; margin-bottom: 0.8em; }
-    :global(.news-item a) { color: #0366d6; text-decoration: none; font-weight: 500; font-size: 0.95em; }
-    :global(.news-item a:hover) { text-decoration: underline; }
+
+    :global(.news-title-link) {
+        color: #24292e; 
+        text-decoration: none;
+        transition: color 0.2s;
+    }
     
+    :global(.news-title-link:hover) {
+        color: #0366d6;
+        text-decoration: underline;
+    }
+
+    :global(.news-date) { font-size: 0.85em; color: #586069; margin-bottom: 0.8em; }
+    
+    :global(.news-summary) {
+        line-height: 1.6;
+        color: #444;
+        margin-bottom: 0;
+    }
+
     .loading-message, .error-msg {
         text-align: center;
         font-size: 1.1em;
@@ -288,33 +300,25 @@ import Layout from '../../layouts/Layout.astro';
         font-size: 1.5rem;
         cursor: pointer;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        
-        /* 預設隱藏 */
         opacity: 0;
         visibility: hidden;
         transform: translateY(20px);
         transition: all 0.3s ease;
-        
         z-index: 1000;
         display: flex;
         align-items: center;
         justify-content: center;
     }
-
-    /* 顯示狀態 */
     .back-to-top.show {
         opacity: 0.9;
         visibility: visible;
         transform: translateY(0);
     }
-
     .back-to-top:hover {
         background-color: #024ea4;
         opacity: 1;
-        transform: translateY(-2px); /* 懸停時稍微上浮 */
+        transform: translateY(-2px);
     }
-
-    /* 手機版稍微縮小並靠邊一點，避免遮擋內容 */
     @media (max-width: 768px) {
         .back-to-top {
             width: 3rem;

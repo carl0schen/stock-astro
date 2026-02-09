@@ -3,24 +3,50 @@
 interface Props {
   title: string;
   date?: string;
-  noHeaderMargin?: boolean; // 新增這個選用參數，預設是 undefined
-  description?: string;     // [新增] SEO 描述
-  image?: string;           // [新增] 社群預覽圖片
+  noHeaderMargin?: boolean;
+  description?: string;
+  image?: string;
 }
 
-// 接收參數，設定預設值
 const { 
   title, 
   date, 
   noHeaderMargin = false,
-  description = "利用 AI 彙整台股盤後資訊，快速掌握市場動向。", // [預設描述]
-  image = "/default-og.png" // [預設圖片] 請確保 public 資料夾有這張圖
+  description: propDescription,
+  image = "/default-og.png"
 } = Astro.props;
 
-// 產生標準網址 (Canonical URL)
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+// 1. 預設的全站描述
+const defaultDescription = "利用 AI 彙整台股盤後資訊，快速掌握市場動向。";
 
-// [新增] 產生圖片的絕對路徑 (OG 標籤強制要求絕對路徑 https://...)
+// 2. 【核心邏輯】決定最終要顯示什麼描述
+let finalDescription = propDescription; // 如果有傳入特定描述 (例如 contact 頁)，優先使用
+
+// 如果沒有傳入描述，且標題包含「法人買賣超整理」，就自動產生！
+if (!finalDescription && title.includes("法人買賣超整理")) {
+  
+  // 取得標題中的日期部分 (假設標題格式為 "2026年2月6日 法人買賣超整理...")
+  // 用空白切割，取第一個部分
+  const datePart = title.split(' ')[0]; 
+
+  if (title.includes("週報")) {
+    // 週報格式
+    finalDescription = `本文整理了${datePart}三大法人的交易動向。`;
+  } else if (title.includes("月報")) {
+    // 月報格式
+    finalDescription = `本文整理了${datePart}三大法人的交易動向。`;
+  } else {
+    // 日報格式 (預設)
+    finalDescription = `本文整理了${datePart}台股盤後三大法人的交易動向。`;
+  }
+}
+
+// 3. 如果經過上面判斷還是空的，就用預設值
+if (!finalDescription) {
+  finalDescription = defaultDescription;
+}
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const socialImageURL = new URL(image, Astro.site);
 ---
 
@@ -33,23 +59,26 @@ const socialImageURL = new URL(image, Astro.site);
   
   <title>{title}</title>
   
-  <meta name="description" content={description} />
+  <meta name="description" content={finalDescription} />
   <link rel="canonical" href={canonicalURL} />
   
   <meta property="og:type" content="website" />
   <meta property="og:url" content={canonicalURL} />
   <meta property="og:title" content={title} />
-  <meta property="og:description" content={description} />
+  <meta property="og:description" content={finalDescription} />
   <meta property="og:image" content={socialImageURL} />
 
   <meta property="twitter:card" content="summary_large_image" />
   <meta property="twitter:url" content={canonicalURL} />
   <meta property="twitter:title" content={title} />
-  <meta property="twitter:description" content={description} />
+  <meta property="twitter:description" content={finalDescription} />
   <meta property="twitter:image" content={socialImageURL} />
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown-light.css">
   <link rel="alternate" type="application/rss+xml" title="台股盤後 - 法人買賣超整理" href="/rss.xml">
+
+<style is:global>
+  /* ... (維持原本樣式) ... */
 
 <style is:global>
   html {

@@ -28,11 +28,11 @@ if (!finalDescription && title.includes("法人買賣超整理") && /^\d/.test(t
   const datePart = title.split(' ')[0]; 
 
   if (title.includes("週報")) {
-    finalDescription = `本文整理了 ${datePart} 三大法人的交易動向。`;
+    finalDescription = `本文整理了${datePart}三大法人的交易動向。`;
   } else if (title.includes("月報")) {
-    finalDescription = `本文整理了 ${datePart} 三大法人的交易動向。`;
+    finalDescription = `本文整理了${datePart}三大法人的交易動向。`;
   } else {
-    finalDescription = `本文整理了 ${datePart} 台股盤後三大法人的交易動向。`;
+    finalDescription = `本文整理了${datePart}台股盤後三大法人的交易動向。`;
   }
 }
 

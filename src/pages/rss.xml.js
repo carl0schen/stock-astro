@@ -117,8 +117,8 @@ export async function GET(context) {
   const limitedPosts = allPosts.slice(0, 20);
 
   return rss({
-    title: '台股盤後 - 法人買賣超整理',
-    description: '利用AI彙整台股盤後資訊，快速掌握市場動向。',
+    title: '台股法人買賣超整理',
+    description: '利用 AI 彙整台股盤後資訊，快速掌握市場動向。',
     site: context.site,
     items: limitedPosts.map((post) => ({
       title: post.customTitle,

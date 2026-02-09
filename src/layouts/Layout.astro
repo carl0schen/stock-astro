@@ -3,13 +3,25 @@
 interface Props {
   title: string;
   date?: string;
-    // 新增這個選用參數，預設是 undefined (代表要邊距)
-    noHeaderMargin?: boolean; 
+  noHeaderMargin?: boolean; // 新增這個選用參數，預設是 undefined
+  description?: string;     // [新增] SEO 描述
+  image?: string;           // [新增] 社群預覽圖片
 }
 
-// 接收參數，預設 false
-const { title, date, noHeaderMargin = false } = Astro.props;
+// 接收參數，設定預設值
+const { 
+  title, 
+  date, 
+  noHeaderMargin = false,
+  description = "利用 AI 彙整台股盤後資訊，快速掌握市場動向。", // [預設描述]
+  image = "/default-og.png" // [預設圖片] 請確保 public 資料夾有這張圖
+} = Astro.props;
+
+// 產生標準網址 (Canonical URL)
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+
+// [新增] 產生圖片的絕對路徑 (OG 標籤強制要求絕對路徑 https://...)
+const socialImageURL = new URL(image, Astro.site);
 ---
 
 <!DOCTYPE html>
@@ -17,8 +29,25 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 <head>
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+  <meta name="generator" content={Astro.generator} />
+  
   <title>{title}</title>
+  
+  <meta name="description" content={description} />
   <link rel="canonical" href={canonicalURL} />
+  
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonicalURL} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={socialImageURL} />
+
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content={canonicalURL} />
+  <meta property="twitter:title" content={title} />
+  <meta property="twitter:description" content={description} />
+  <meta property="twitter:image" content={socialImageURL} />
+
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown-light.css">
   <link rel="alternate" type="application/rss+xml" title="台股盤後 - 法人買賣超整理" href="/rss.xml">
 
@@ -44,13 +73,13 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     padding-top: 1rem;
     padding-bottom: 1rem;
   }
-  
+   
   nav {
     display: flex;
     gap: 1.5rem;
     font-size: 1rem;
     
-    /* 新增下面這一行，強制垂直置中 */
+    /* 強制垂直置中 */
     align-items: center; 
   }
 
@@ -59,7 +88,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     color: #555;
     font-weight: 500;
   }
-  
+   
   nav a:hover {
     color: #0366d6; /* Github 藍色 */
   }
@@ -79,7 +108,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
   }
   body .markdown-body table { width: 100%; }
 
-  /* --- 底部上一頁/下一頁按鈕樣式 (等一下會用到) --- */
+  /* --- 底部上一頁/下一頁按鈕樣式 --- */
   .post-nav {
     margin-top: 2rem;
     padding-top: 1rem;

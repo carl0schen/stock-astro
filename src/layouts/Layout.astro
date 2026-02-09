@@ -3,13 +3,46 @@
 interface Props {
   title: string;
   date?: string;
-    // 新增這個選用參數，預設是 undefined (代表要邊距)
-    noHeaderMargin?: boolean; 
+  noHeaderMargin?: boolean;
+  description?: string;
+  image?: string;
 }
 
-// 接收參數，預設 false
-const { title, date, noHeaderMargin = false } = Astro.props;
+const { 
+  title, 
+  date, 
+  noHeaderMargin = false,
+  description: propDescription,
+  image = "/default-og.png"
+} = Astro.props;
+
+// 1. 預設的全站描述 (首頁會用到這個)
+const defaultDescription = "利用 AI 彙整台股盤後資訊，快速掌握市場動向。";
+
+let finalDescription = propDescription;
+
+// 2. 【核心邏輯修正】
+// 條件增加：標題包含「法人買賣超整理」 且 [修改] 標題必須以「數字」開頭 (例如 2026...)
+if (!finalDescription && title.includes("法人買賣超整理") && /^\d/.test(title)) {
+  
+  const datePart = title.split(' ')[0]; 
+
+  if (title.includes("週報")) {
+    finalDescription = `本文整理了${datePart}三大法人的交易動向。`;
+  } else if (title.includes("月報")) {
+    finalDescription = `本文整理了${datePart}三大法人的交易動向。`;
+  } else {
+    finalDescription = `本文整理了${datePart}台股盤後三大法人的交易動向。`;
+  }
+}
+
+// 3. 如果經過上面判斷還是空的 (例如首頁)，就用預設值
+if (!finalDescription) {
+  finalDescription = defaultDescription;
+}
+
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const socialImageURL = new URL(image, Astro.site);
 ---
 
 <!DOCTYPE html>
@@ -17,10 +50,30 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 <head>
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+  <meta name="generator" content={Astro.generator} />
+  
   <title>{title}</title>
+  
+  <meta name="description" content={finalDescription} />
   <link rel="canonical" href={canonicalURL} />
+  
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonicalURL} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={finalDescription} />
+  <meta property="og:image" content={socialImageURL} />
+
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content={canonicalURL} />
+  <meta property="twitter:title" content={title} />
+  <meta property="twitter:description" content={finalDescription} />
+  <meta property="twitter:image" content={socialImageURL} />
+
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown-light.css">
   <link rel="alternate" type="application/rss+xml" title="台股盤後 - 法人買賣超整理" href="/rss.xml">
+
+<style is:global>
+  /* ... (維持原本樣式) ... */
 
 <style is:global>
   html {
@@ -44,13 +97,13 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     padding-top: 1rem;
     padding-bottom: 1rem;
   }
-  
+   
   nav {
     display: flex;
     gap: 1.5rem;
     font-size: 1rem;
     
-    /* 新增下面這一行，強制垂直置中 */
+    /* 強制垂直置中 */
     align-items: center; 
   }
 
@@ -59,7 +112,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     color: #555;
     font-weight: 500;
   }
-  
+   
   nav a:hover {
     color: #0366d6; /* Github 藍色 */
   }
@@ -79,7 +132,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
   }
   body .markdown-body table { width: 100%; }
 
-  /* --- 底部上一頁/下一頁按鈕樣式 (等一下會用到) --- */
+  /* --- 底部上一頁/下一頁按鈕樣式 --- */
   .post-nav {
     margin-top: 2rem;
     padding-top: 1rem;

@@ -1,21 +1,27 @@
 // astro.config.mjs
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
-
-// 1. 新增這行：引入 rehype-external-links 套件
-import rehypeExternalLinks from 'rehype-external-links'; 
+import rehypeExternalLinks from 'rehype-external-links'; // 1. 引入 rehype
+import indexNow from 'astro-indexnow'; // 引入 IndexNow
 
 export default defineConfig({
   site: 'https://stock.may.tw',
+
+  // --- 把所有外掛放在同一個陣列裡 ---
+  integrations: [
+    sitemap(),
+    indexNow({
+      key: '9e8bb32fa98f4ffa9f3ffec9485f7761',
+    })
+  ],
+  // ------------------------------------------
 
   // 關閉開發工具列
   devToolbar: {
     enabled: false
   },
 
-  integrations: [sitemap()],
-
-  // 2. 新增這段：Markdown 設定
+  // Markdown 設定
   markdown: {
     rehypePlugins: [
       [

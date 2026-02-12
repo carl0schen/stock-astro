@@ -24,7 +24,7 @@ let finalDescription = propDescription;
 // 2. 【核心邏輯修正】
 // 條件增加：標題包含「法人買賣超整理」 且 [修改] 標題必須以「數字」開頭 (例如 2026...)
 if (!finalDescription && title.includes("法人買賣超整理") && /^\d/.test(title)) {
-  
+   
   const datePart = title.split(' ')[0]; 
 
   if (title.includes("週報")) {
@@ -51,12 +51,12 @@ const socialImageURL = new URL(image, Astro.site);
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
   <meta name="generator" content={Astro.generator} />
-  
+   
   <title>{title}</title>
-  
+   
   <meta name="description" content={finalDescription} />
   <link rel="canonical" href={canonicalURL} />
-  
+   
   <meta property="og:type" content="website" />
   <meta property="og:url" content={canonicalURL} />
   <meta property="og:title" content={title} />
@@ -73,9 +73,7 @@ const socialImageURL = new URL(image, Astro.site);
   <link rel="alternate" type="application/rss+xml" title="台股法人買賣超整理" href="/rss.xml">
 
 <style is:global>
-  /* ... (維持原本樣式) ... */
-
-<style is:global>
+  /* 全站基礎樣式 */
   html {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     background-color: #fff;
@@ -97,12 +95,11 @@ const socialImageURL = new URL(image, Astro.site);
     padding-top: 1rem;
     padding-bottom: 1rem;
   }
-   
+    
   nav {
     display: flex;
     gap: 1.5rem;
     font-size: 1rem;
-    
     /* 強制垂直置中 */
     align-items: center; 
   }
@@ -112,7 +109,7 @@ const socialImageURL = new URL(image, Astro.site);
     color: #555;
     font-weight: 500;
   }
-   
+    
   nav a:hover {
     color: #0366d6; /* Github 藍色 */
   }
@@ -130,7 +127,6 @@ const socialImageURL = new URL(image, Astro.site);
     overflow-x: auto; 
     margin-bottom: 1.5rem;
   }
-  body .markdown-body table { width: 100%; }
 
   /* --- 底部上一頁/下一頁按鈕樣式 --- */
   .post-nav {

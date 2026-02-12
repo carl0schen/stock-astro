@@ -11,7 +11,7 @@ export default defineConfig({
   integrations: [
     sitemap(),
     indexNow({
-      key: '9e8bb32fa98f4ffa9f3ffec9485f7761',
+      key: '89813b002944484791a7235f44977d35',
     })
   ],
   // ------------------------------------------

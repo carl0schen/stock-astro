@@ -132,10 +132,11 @@
   "https://stock.may.tw/2026/weekly/03/": "sha256:eacc3261c857f4de619b295ce88b4aab0f88c08528e80121a5ae30a1eacb5586",
   "https://stock.may.tw/2026/weekly/04/": "sha256:00ff1f33dfb642aef50bbe1a9071e10fd4bd257744c15b745f4f4083723d907f",
   "https://stock.may.tw/2026/weekly/05/": "sha256:6286faa8b1a6b26fa5c0a79621f072d15b043c8392f0adb48bc42a10982b8cf5",
-  "https://stock.may.tw/2026/weekly/06/": "sha256:72a4d2027fce78383c0a5483d77a4fe273dec0c2600a5cd5e3ac0a08b7cd12b2",
+  "https://stock.may.tw/2026/weekly/06/": "sha256:99661058d7369076cc006be7f4f10e2f573cff4266a7177d4ae1136e05fe946e",
+  "https://stock.may.tw/2026/weekly/07/": "sha256:5b58a38e93602b3cdfe1e434d6607eb9a8a5d4dee81f961e310f36cad67f26f0",
   "https://stock.may.tw/contact/": "sha256:288ab6b09128a9f22f92e198f3a58d792de859dfb2abbac8d52473ca1bb0675a",
   "https://stock.may.tw/contact/thanks/": "sha256:2d50090e6aacc041d45b2d511e0b653ff05601401ac5e3f8c002b861f361f1a8",
-  "https://stock.may.tw/": "sha256:1573a0028370b859d1f4b244484d186dc354a39f30ba0d952aa8794e442f31d0",
+  "https://stock.may.tw/": "sha256:2e2a32dd29c04db1cc189b327912615814ecf5e6a70221c7572cf77a6cc7511d",
   "https://stock.may.tw/news/": "sha256:8b8def848ee13246611de70a4631b522914c11ce8744a8cb979c80641a9f7895",
   "https://stock.may.tw/search/": "sha256:becff708e4d7e438ce2ca5a4115dab2a6b315364168c28015dc77e53117fcb9f"
 }

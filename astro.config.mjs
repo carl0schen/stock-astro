@@ -10,9 +10,14 @@ export default defineConfig({
   site: 'https://stock.may.tw',
 
   integrations: [
-    sitemap(),
+    sitemap({
+      serialize(item) {
+        item.lastmod = new Date().toISOString();
+        return item;
+      },
+    }),
     indexNow({
-      key: INDEXNOW_KEY, 
+      key: INDEXNOW_KEY,
     })
   ],
 

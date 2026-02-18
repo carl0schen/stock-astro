@@ -15,6 +15,9 @@ export default defineConfig({
         item.lastmod = new Date().toISOString();
         return item;
       },
+      filter: (page) => {
+        return page !== 'https://stock.may.tw/contact/thanks/';
+      },
     }),
     indexNow({
       key: INDEXNOW_KEY,

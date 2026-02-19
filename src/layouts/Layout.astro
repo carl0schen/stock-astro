@@ -1,5 +1,7 @@
 ---
 // src/layouts/Layout.astro
+import '../style/github-markdown-light.css';
+
 interface Props {
   title: string;
   date?: string;
@@ -8,9 +10,9 @@ interface Props {
   image?: string;
 }
 
-const { 
-  title, 
-  date, 
+const {
+  title,
+  date,
   noHeaderMargin = false,
   description: propDescription,
   image = "/default-og.png"
@@ -25,7 +27,7 @@ let finalDescription = propDescription;
 // 條件增加：標題包含「法人買賣超整理」 且 [修改] 標題必須以「數字」開頭 (例如 2026...)
 if (!finalDescription && title.includes("法人買賣超整理") && /^\d/.test(title)) {
    
-  const datePart = title.split(' ')[0]; 
+  const datePart = title.split(' ')[0];
 
   if (title.includes("週報")) {
     finalDescription = `本文整理了${datePart}三大法人的交易動向。`;
@@ -49,14 +51,14 @@ const socialImageURL = new URL(image, Astro.site);
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="generator" content={Astro.generator} />
-   
+
   <title>{title}</title>
-   
+
   <meta name="description" content={finalDescription} />
   <link rel="canonical" href={canonicalURL} />
-   
+
   <meta property="og:type" content="website" />
   <meta property="og:url" content={canonicalURL} />
   <meta property="og:title" content={title} />
@@ -69,7 +71,6 @@ const socialImageURL = new URL(image, Astro.site);
   <meta property="twitter:description" content={finalDescription} />
   <meta property="twitter:image" content={socialImageURL} />
 
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown-light.css">
   <link rel="alternate" type="application/rss+xml" title="台股法人買賣超整理" href="/rss.xml">
 
 <style is:global>
@@ -95,13 +96,13 @@ const socialImageURL = new URL(image, Astro.site);
     padding-top: 1rem;
     padding-bottom: 1rem;
   }
-    
+
   nav {
     display: flex;
     gap: 1.5rem;
     font-size: 1rem;
     /* 強制垂直置中 */
-    align-items: center; 
+    align-items: center;
   }
 
   nav a {
@@ -124,7 +125,7 @@ const socialImageURL = new URL(image, Astro.site);
   body .markdown-body table {
     display: block;
     width: 100%;
-    overflow-x: auto; 
+    overflow-x: auto;
     margin-bottom: 1.5rem;
   }
 

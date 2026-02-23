@@ -28,8 +28,8 @@
 ### 文章訂閱
 
 - **RSS 訂閱：**[https://stock.may.tw/rss.xml](https://stock.may.tw/rss.xml)
-- **電子郵件訂閱：**使用 [Feedrabbit](https://feedrabbit.com/) 服務。
-- **Telegram 訂閱：**使用 [RSS-to-Telegram-Bot](https://t.me/RSStT_Bot)。
+- **電子郵件訂閱：** 使用 [Feedrabbit](https://feedrabbit.com/) 服務。
+- **Telegram 訂閱：** 使用 [RSS-to-Telegram-Bot](https://t.me/RSStT_Bot)。
 
 ### 市場情報
 

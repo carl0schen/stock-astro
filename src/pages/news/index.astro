@@ -163,6 +163,24 @@ import Layout from '../../layouts/Layout.astro';
     // 執行載入
     loadAllNews();
 
+    // 導覽列微動暗示 (Nudge Effect)
+    window.addEventListener('load', () => {
+        const nav = document.getElementById('filter-nav');
+        // 檢查：只有當「內容總寬度」大於「螢幕寬度」時 (代表真的有被隱藏的按鈕)，才執行微動
+        if (nav && nav.scrollWidth > nav.clientWidth) {
+            setTimeout(() => {
+                // 1. 先往左滑動 40px
+                nav.scrollBy({ left: 40, behavior: 'smooth' });
+                
+                // 2. 過 400 毫秒後，再滑回原位
+                setTimeout(() => {
+                    nav.scrollBy({ left: -40, behavior: 'smooth' });
+                }, 400);
+                
+            }, 600); // 網頁載入完成後等待 0.6 秒再彈跳，確保使用者有看到
+        }
+    });
+    
     // --- 過濾按鈕邏輯 ---
     const filterBtns = document.querySelectorAll('.filter-btn');
     const outputContainer = document.getElementById('all-news-output');

@@ -31,7 +31,7 @@
 - **電子郵件訂閱：** 使用 [Feedrabbit](https://feedrabbit.com/) 服務。
 - **Telegram 訂閱：** 使用 [RSS-to-Telegram-Bot](https://t.me/RSStT_Bot)。
 
-### 盤後新聞
+### 市場情報
 
-來源：Yahoo 奇摩股市（[台股盤後](https://tw.stock.yahoo.com/rss?q=台股盤後) / [美股盤後](https://tw.stock.yahoo.com/rss?q=美股盤後)）  
-網址：[盤後新聞](https://stock.may.tw/news/)
+來源：Yahoo 奇摩股市（[台股盤後](https://tw.stock.yahoo.com/rss?q=台股盤後) / [美股盤後](https://tw.stock.yahoo.com/rss?q=美股盤後)）| TechnNews 科技新報（[半導體](https://technews.tw/category/semiconductor/feed/) / [財經](https://technews.tw/category/finance/feed/)）
+網址：[市場情報](https://stock.may.tw/news/)

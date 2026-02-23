@@ -4,34 +4,29 @@ import Layout from '../../layouts/Layout.astro';
 ---
 
 <Layout 
-    title="台股與美股盤後新聞" 
-    description="利用 RSS 彙整 Yahoo 奇摩股市的台股與美股盤後新聞。"
+    title="台美股市與產業情報" 
+    description="彙整 Yahoo 股市與科技新報，提供最新台美股市動態、半導體產業與財經焦點新聞。"
 >
-    <div class="jump-nav-wrapper">
-        <div class="jump-nav" id="jump-nav">
-            <a id="tw-stock-link" href="#tw-stock-title">台股盤後</a>
-            <a id="us-stock-link" href="#us-stock-title">美股盤後</a>
+    <div class="filter-nav-wrapper">
+        <div class="filter-nav" id="filter-nav">
+            <button class="filter-btn active" data-filter="all">全部新聞</button>
+            <button class="filter-btn" data-filter="台股盤後">台股盤後</button>
+            <button class="filter-btn" data-filter="美股盤後">美股盤後</button>
+            <button class="filter-btn" data-filter="半導體">半導體產業</button>
+            <button class="filter-btn" data-filter="財經焦點">財經焦點</button>
         </div>
     </div>
 
     <div class="news-container">
-        
         <div class="news-section">
-            <h1 id="tw-stock-title">台股盤後新聞</h1>
-            <div id="loading-tw" class="loading-message">讀取中...</div>
-            <div id="tw-stock-output"></div>
-        </div>
-        
-        <div class="news-section">
-            <h1 id="us-stock-title">美股盤後新聞</h1>
-            <div id="loading-us" class="loading-message">讀取中...</div>
-            <div id="us-stock-output"></div>
+            <h1 class="page-title">股市情報與產業追蹤</h1>
+            <div id="loading-msg" class="loading-message">讀取中...</div>
+            <div id="all-news-output"></div>
         </div>
 
         <div class="source-attribution">
-            資料來源：<a href="https://tw.stock.yahoo.com/" target="_blank" rel="nofollow noopener noreferrer">Yahoo 奇摩股市</a>
+            資料來源：<a href="https://tw.stock.yahoo.com/" target="_blank" rel="nofollow noopener noreferrer">Yahoo 奇摩股市</a> | <a href="https://technews.tw/" target="_blank" rel="nofollow noopener noreferrer">TechNews 科技新報</a> 
         </div>
-
     </div>
 
     <button id="back-to-top" class="back-to-top" aria-label="回到頂部">
@@ -40,129 +35,159 @@ import Layout from '../../layouts/Layout.astro';
 </Layout>
 
 <script>
-    const newsToShow = 15;
+    const newsToShowPerFeed = 15; // 每個來源抓取的數量
     const apiKey = import.meta.env.PUBLIC_RSS_API_KEY;
 
-    function fetchAndDisplayNews(rssFeedUrl, outputElementId, loadingElementId) {
-        const rss2jsonApi = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssFeedUrl)}&count=${newsToShow}&api_key=${apiKey}`;
-        const output = document.getElementById(outputElementId);
-        const loadingMessage = document.getElementById(loadingElementId);
+    // 1. 定義您的 RSS 來源清單 (未來擴充只要加在這裡即可)
+    const feeds = [
+        // 1. 市場總結 (Yahoo)
+        { url: 'https://tw.stock.yahoo.com/rss?q=%E5%8F%B0%E8%82%A1%E7%9B%A4%E5%BE%8C', tag: '台股盤後', colorClass: 'tag-tw' },
+        { url: 'https://tw.stock.yahoo.com/rss?q=%E7%BE%8E%E8%82%A1%E7%9B%A4%E5%BE%8C', tag: '美股盤後', colorClass: 'tag-us' },
+        
+        // 2. 產業與總經 (TechNews 科技新報)
+        { url: 'https://technews.tw/category/semiconductor/feed/', tag: '半導體', colorClass: 'tag-semi' },
+        { url: 'https://technews.tw/category/finance/feed/', tag: '財經焦點', colorClass: 'tag-finance' }
+    ];
 
-        if (!output || !loadingMessage) return;
-
-        loadingMessage.style.display = 'block';
-
-        fetch(rss2jsonApi)
-            .then(response => response.json())
-            .then(data => {
-                loadingMessage.style.display = 'none';
-
-                if (data.status === 'ok' && data.items.length > 0) {
-                    for (let i = 0; i < newsToShow && i < data.items.length; i++) {
-                        const item = data.items[i];
-                        
-                        const newsItem = document.createElement('div');
-                        newsItem.classList.add('news-item');
-                        
-                        // 1. 標題連結
-                        const titleHeader = document.createElement('h2');
-                        const titleLink = document.createElement('a');
-                        
-                        titleLink.href = item.link;
-                        titleLink.textContent = item.title;
-                        titleLink.target = '_blank';
-                        titleLink.rel = 'noopener noreferrer';
-                        titleLink.classList.add('news-title-link'); 
-                        
-                        titleHeader.appendChild(titleLink);
-    
-                        // 2. 日期
-                        const date = document.createElement('p');
-                        date.classList.add('news-date');
-                        
-                        let rawDateStr = item.pubDate.replace(/-/g, '/') + ' UTC';
-                        let dateObj = new Date(rawDateStr);
-
-                        const datePart = dateObj.toLocaleDateString('zh-TW', {
-                            timeZone: 'Asia/Taipei',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                        });
-
-                        const timePart = dateObj.toLocaleTimeString('zh-TW', {
-                            timeZone: 'Asia/Taipei',
-                            hour12: true,
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        });
-
-                        date.textContent = `${datePart} ${timePart}`;
-                        
-                        // 3. 內容摘要
-                        const content = document.createElement('p');
-                        content.classList.add('news-summary');
-                        
-                        const cleanDescription = item.description.replace(/<[^>]*>?/gm, ''); 
-                        
-                        // JS 強制加上 ...
-                        content.textContent = cleanDescription.trim() + '...';
-    
-                        newsItem.appendChild(titleHeader);
-                        newsItem.appendChild(date);
-                        newsItem.appendChild(content);
-                        
-                        output.appendChild(newsItem);
-                    }
-                } else {
-                    output.innerHTML = '<p class="error-msg">無法載入新聞資料，請稍後再試。</p>';
-                }
-            })
-            .catch(error => {
-                if (loadingMessage) loadingMessage.style.display = 'none';
-                console.error('Error fetching RSS feed:', error);
-                output.innerHTML = '<p class="error-msg">載入新聞時發生錯誤，請檢查網路連線或稍後再試。</p>';
-            });
-    }
-
-    const twStockRss = 'https://tw.stock.yahoo.com/rss?q=%E5%8F%B0%E8%82%A1%E7%9B%A4%E5%BE%8C';
-    const usStockRss = 'https://tw.stock.yahoo.com/rss?q=%E7%BE%8E%E8%82%A1%E7%9B%A4%E5%BE%8C';
-    
-    fetchAndDisplayNews(twStockRss, 'tw-stock-output', 'loading-tw');
-    fetchAndDisplayNews(usStockRss, 'us-stock-output', 'loading-us');
-
-    // 平滑捲動功能 (導覽列)
-    const twStockLink = document.getElementById('tw-stock-link');
-    const usStockLink = document.getElementById('us-stock-link');
-    const twStockTitle = document.getElementById('tw-stock-title');
-    const usStockTitle = document.getElementById('us-stock-title');
-    const jumpNav = document.getElementById('jump-nav');
-
-    function scrollToElement(element) {
-        if (element && jumpNav) {
-            const navHeight = jumpNav.offsetHeight + 20; 
-            const elementTop = element.getBoundingClientRect().top + window.scrollY;
-            window.scrollTo({
-                top: elementTop - navHeight,
-                behavior: 'smooth'
-            });
+    // 負責抓取單一 RSS 並將 tag 塞入資料中
+    async function fetchFeed(feedDef) {
+        const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedDef.url)}&count=${newsToShowPerFeed}&api_key=${apiKey}`;
+        try {
+            const response = await fetch(api);
+            const data = await response.json();
+            if (data.status === 'ok' && data.items.length > 0) {
+                // 將這個來源的標籤資訊附加到每一則新聞上
+                return data.items.map(item => ({
+                    ...item,
+                    feedTag: feedDef.tag,
+                    feedColor: feedDef.colorClass
+                }));
+            }
+            return [];
+        } catch (error) {
+            console.error(`Error fetching ${feedDef.tag} RSS:`, error);
+            return []; // 發生錯誤時回傳空陣列，避免整個網頁壞掉
         }
     }
 
-    if (twStockLink) {
-        twStockLink.addEventListener('click', (event) => {
-            event.preventDefault();
-            scrollToElement(twStockTitle);
+    // 主邏輯：抓取所有來源、合併、排序、渲染
+    async function loadAllNews() {
+        const output = document.getElementById('all-news-output');
+        const loadingMessage = document.getElementById('loading-msg');
+        
+        if (!output || !loadingMessage) return;
+
+        // 同時發起所有 RSS 請求 (效能更好)
+        const allResults = await Promise.all(feeds.map(fetchFeed));
+        
+        // 將多個陣列扁平化合併成一個大陣列
+        let combinedNews = allResults.flat();
+
+        if (combinedNews.length === 0) {
+            loadingMessage.style.display = 'none';
+            output.innerHTML = '<p class="error-msg">無法載入新聞資料，請檢查網路連線或稍後再試。</p>';
+            return;
+        }
+
+        // 依照發布時間排序 (新 -> 舊)
+        combinedNews.sort((a, b) => {
+            const dateA = new Date(a.pubDate.replace(/-/g, '/') + ' UTC').valueOf();
+            const dateB = new Date(b.pubDate.replace(/-/g, '/') + ' UTC').valueOf();
+            return dateB - dateA;
+        });
+
+        // 隱藏載入中訊息
+        loadingMessage.style.display = 'none';
+
+        // 渲染 DOM
+        combinedNews.forEach(item => {
+            const newsItem = document.createElement('div');
+            newsItem.classList.add('news-item');
+            // 加上 data-tag 屬性，供過濾功能使用
+            newsItem.setAttribute('data-tag', item.feedTag);
+            
+            // 1. 標題與標籤
+            const titleHeader = document.createElement('h2');
+            
+            const tagSpan = document.createElement('span');
+            tagSpan.classList.add('news-tag', item.feedColor);
+            tagSpan.textContent = item.feedTag;
+
+            const titleLink = document.createElement('a');
+            titleLink.href = item.link;
+            titleLink.textContent = item.title;
+            titleLink.target = '_blank';
+            titleLink.rel = 'noopener noreferrer';
+            titleLink.classList.add('news-title-link'); 
+            
+            titleHeader.appendChild(tagSpan);
+            titleHeader.appendChild(titleLink);
+
+            // 2. 日期
+            const date = document.createElement('p');
+            date.classList.add('news-date');
+            
+            let rawDateStr = item.pubDate.replace(/-/g, '/') + ' UTC';
+            let dateObj = new Date(rawDateStr);
+
+            const datePart = dateObj.toLocaleDateString('zh-TW', {
+                timeZone: 'Asia/Taipei',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            const timePart = dateObj.toLocaleTimeString('zh-TW', {
+                timeZone: 'Asia/Taipei',
+                hour12: true,
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            date.textContent = `${datePart} ${timePart}`;
+            
+            // 3. 內容摘要
+            const content = document.createElement('p');
+            content.classList.add('news-summary');
+            const cleanDescription = item.description.replace(/<[^>]*>?/gm, ''); 
+            content.textContent = cleanDescription.trim() + '...';
+
+            newsItem.appendChild(titleHeader);
+            newsItem.appendChild(date);
+            newsItem.appendChild(content);
+            
+            output.appendChild(newsItem);
         });
     }
 
-    if (usStockLink) {
-        usStockLink.addEventListener('click', (event) => {
-            event.preventDefault();
-            scrollToElement(usStockTitle);
-        });
-    }
+    // 執行載入
+    loadAllNews();
 
+    // --- 過濾按鈕邏輯 ---
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const outputContainer = document.getElementById('all-news-output');
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // 1. 切換 active 樣式
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // 2. 執行過濾
+            const targetTag = btn.getAttribute('data-filter');
+            const allItems = outputContainer.querySelectorAll('.news-item');
+
+            allItems.forEach(item => {
+                if (targetTag === 'all' || item.getAttribute('data-tag') === targetTag) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // --- 回到頂部按鈕邏輯 ---
     const backToTopBtn = document.getElementById('back-to-top');
     if (backToTopBtn) {
         window.addEventListener('scroll', () => {
@@ -173,17 +198,14 @@ import Layout from '../../layouts/Layout.astro';
             }
         });
         backToTopBtn.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
 </script>
 
 <style>
-    /* 黏性導覽列樣式 */
-    .jump-nav-wrapper {
+    /* 黏性過濾導覽列樣式 */
+    .filter-nav-wrapper {
         position: sticky;
         top: 0; 
         z-index: 100;
@@ -194,40 +216,46 @@ import Layout from '../../layouts/Layout.astro';
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
-    .jump-nav {
+    .filter-nav {
         display: flex;
         justify-content: center;
         padding: 0.8rem 0;
+        gap: 0.5rem;
     }
 
-    .jump-nav a {
-        font-size: 1.1em;
-        text-decoration: none;
-        color: #0366d6;
-        padding: 0 1.5rem;
+    .filter-btn {
+        background: transparent;
+        border: 1px solid transparent;
+        font-size: 1.05em;
+        color: #555;
+        padding: 0.4rem 1.2rem;
         cursor: pointer;
-        font-weight: 600;
-        border-right: 1px solid #eee;
-    }
-
-    .jump-nav a:last-child {
-        border-right: none;
+        font-weight: 500;
+        border-radius: 20px;
+        transition: all 0.2s ease;
     }
     
-    .jump-nav a:hover {
-        text-decoration: underline;
-        color: #024ea4;
+    .filter-btn:hover {
+        background-color: #f0f4f8;
+        color: #0366d6;
+    }
+
+    .filter-btn.active {
+        background-color: #0366d6;
+        color: #fff;
+        border-color: #0366d6;
     }
 
     .news-container { padding-top: 2em; }
     .news-section { margin-bottom: 4em; }
     
-    .news-section h1 {
+    .page-title {
         font-size: 1.8em;
         text-align: center;
-        border-bottom: 2px solid #0366d6;
+        border-bottom: 2px solid #eaeaea;
         padding-bottom: 0.5em;
         margin-top: 0;
+        margin-bottom: 1.5em;
         color: #24292e;
     }
 
@@ -235,6 +263,12 @@ import Layout from '../../layouts/Layout.astro';
         border-bottom: 1px solid #eaeaea;
         padding-bottom: 1.2em; 
         margin-bottom: 1.5em;
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
     }
     
     :global(.news-item:last-child) { border-bottom: none; }
@@ -244,7 +278,27 @@ import Layout from '../../layouts/Layout.astro';
         font-weight: 600;
         margin-top: 0;
         margin-bottom: 0.5em;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
     }
+
+    /* 新增：新聞標籤樣式 */
+    :global(.news-tag) {
+        font-size: 0.75em;
+        padding: 0.25em 0.6em;
+        border-radius: 4px;
+        color: white;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    /* 為不同主題設定專屬顏色 */
+    :global(.tag-tw) { background-color: #0366d6; }      /* 台股：藍色 */
+    :global(.tag-us) { background-color: #28a745; }      /* 美股：綠色 */
+    :global(.tag-semi) { background-color: #fd7e14; }    /* 半導體：橘黃色 */
+    :global(.tag-finance) { background-color: #6f42c1; } /* 財經焦點：紫色 */
 
     :global(.news-title-link) {
         color: #24292e; 
@@ -286,7 +340,6 @@ import Layout from '../../layouts/Layout.astro';
     }
     .source-attribution a { color: #0366d6; text-decoration: none; }
 
-    /* --- 新增：回到頂部按鈕樣式 --- */
     .back-to-top {
         position: fixed;
         bottom: 2rem;

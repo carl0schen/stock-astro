@@ -45,18 +45,24 @@ import Layout from '../../layouts/Layout.astro';
         { url: 'https://tw.stock.yahoo.com/rss?q=%E7%BE%8E%E8%82%A1%E7%9B%A4%E5%BE%8C', tag: '美股盤後', colorClass: 'tag-us' },
         
         // 2. 產業與總經 (TechNews 科技新報)
-        { url: 'https://technews.tw/category/semiconductor/feed/', tag: '半導體', colorClass: 'tag-semi' },
-        { url: 'https://technews.tw/category/finance/feed/', tag: '財經焦點', colorClass: 'tag-finance' }
+        { url: 'https://technews.tw/category/semiconductor/feed', tag: '半導體', colorClass: 'tag-semi' },
+        { url: 'https://finance.technews.tw/feed', tag: '財經焦點', colorClass: 'tag-finance' }
     ];
 
     // 負責抓取單一 RSS 並將 tag 塞入資料中
     async function fetchFeed(feedDef) {
-        const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedDef.url)}&count=${newsToShowPerFeed}&api_key=${apiKey}`;
+        // 1. 網址快取剋星 (Cache Buster)：在網址最後塞入當下的時間戳記
+        // 這樣每次發送的網址結尾都不一樣 (例如 &_t=1708412345678)
+        // 瀏覽器就會認為這是一個「全新的請求」，被迫去問伺服器
+        const timeStamp = new Date().getTime();
+        const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedDef.url)}&count=${newsToShowPerFeed}&api_key=${apiKey}&_t=${timeStamp}`;
+        
         try {
-            const response = await fetch(api);
+            // 2. Fetch API 標準快取控制：明確告知不使用任何快取 (no-store)
+            const response = await fetch(api, { cache: 'no-store' });
             const data = await response.json();
+            
             if (data.status === 'ok' && data.items.length > 0) {
-                // 將這個來源的標籤資訊附加到每一則新聞上
                 return data.items.map(item => ({
                     ...item,
                     feedTag: feedDef.tag,
@@ -66,7 +72,7 @@ import Layout from '../../layouts/Layout.astro';
             return [];
         } catch (error) {
             console.error(`Error fetching ${feedDef.tag} RSS:`, error);
-            return []; // 發生錯誤時回傳空陣列，避免整個網頁壞掉
+            return []; 
         }
     }
 

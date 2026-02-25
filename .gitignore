@@ -25,6 +25,3 @@ pnpm-debug.log*
 
 # VS Code settings
 .vscode/
-
-# astro-indexnow-cache file
-!.astro-indexnow-cache.json

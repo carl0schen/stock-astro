@@ -38,27 +38,20 @@ import Layout from '../../layouts/Layout.astro';
     const newsToShowPerFeed = 15; // 每個來源抓取的數量
     const apiKey = import.meta.env.PUBLIC_RSS_API_KEY;
 
-    // 1. 定義您的 RSS 來源清單 (未來擴充只要加在這裡即可)
+    // 1. 定義您的 RSS 來源清單
     const feeds = [
-        // 1. 市場總結 (Yahoo)
         { url: 'https://tw.stock.yahoo.com/rss?q=%E5%8F%B0%E8%82%A1%E7%9B%A4%E5%BE%8C', tag: '台股盤後', colorClass: 'tag-tw' },
         { url: 'https://tw.stock.yahoo.com/rss?q=%E7%BE%8E%E8%82%A1%E7%9B%A4%E5%BE%8C', tag: '美股盤後', colorClass: 'tag-us' },
-        
-        // 2. 產業與總經 (TechNews 科技新報)
         { url: 'https://technews.tw/category/semiconductor/feed', tag: '半導體', colorClass: 'tag-semi' },
         { url: 'https://finance.technews.tw/feed', tag: '財經焦點', colorClass: 'tag-finance' }
     ];
 
     // 負責抓取單一 RSS 並將 tag 塞入資料中
     async function fetchFeed(feedDef) {
-        // 1. 網址快取剋星 (Cache Buster)：在網址最後塞入當下的時間戳記
-        // 這樣每次發送的網址結尾都不一樣 (例如 &_t=1708412345678)
-        // 瀏覽器就會認為這是一個「全新的請求」，被迫去問伺服器
         const timeStamp = new Date().getTime();
         const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedDef.url)}&count=${newsToShowPerFeed}&api_key=${apiKey}&_t=${timeStamp}`;
         
         try {
-            // 2. Fetch API 標準快取控制：明確告知不使用任何快取 (no-store)
             const response = await fetch(api, { cache: 'no-store' });
             const data = await response.json();
             
@@ -76,45 +69,17 @@ import Layout from '../../layouts/Layout.astro';
         }
     }
 
-    // 主邏輯：抓取所有來源、合併、排序、渲染
-    async function loadAllNews() {
-        const output = document.getElementById('all-news-output');
-        const loadingMessage = document.getElementById('loading-msg');
-        
-        if (!output || !loadingMessage) return;
+    // ✨ 新增：負責將新聞資料轉換成 HTML 並印在畫面上的獨立函式
+    function renderNews(newsArray, outputContainer) {
+        outputContainer.innerHTML = ''; // 渲染前先清空容器，準備無縫替換
 
-        // 同時發起所有 RSS 請求 (效能更好)
-        const allResults = await Promise.all(feeds.map(fetchFeed));
-        
-        // 將多個陣列扁平化合併成一個大陣列
-        let combinedNews = allResults.flat();
-
-        if (combinedNews.length === 0) {
-            loadingMessage.style.display = 'none';
-            output.innerHTML = '<p class="error-msg">無法載入新聞資料，請檢查網路連線或稍後再試。</p>';
-            return;
-        }
-
-        // 依照發布時間排序 (新 -> 舊)
-        combinedNews.sort((a, b) => {
-            const dateA = new Date(a.pubDate.replace(/-/g, '/') + ' UTC').valueOf();
-            const dateB = new Date(b.pubDate.replace(/-/g, '/') + ' UTC').valueOf();
-            return dateB - dateA;
-        });
-
-        // 隱藏載入中訊息
-        loadingMessage.style.display = 'none';
-
-        // 渲染 DOM
-        combinedNews.forEach(item => {
+        newsArray.forEach(item => {
             const newsItem = document.createElement('div');
             newsItem.classList.add('news-item');
-            // 加上 data-tag 屬性，供過濾功能使用
             newsItem.setAttribute('data-tag', item.feedTag);
             
             // 1. 標題與標籤
             const titleHeader = document.createElement('h2');
-            
             const tagSpan = document.createElement('span');
             tagSpan.classList.add('news-tag', item.feedColor);
             tagSpan.textContent = item.feedTag;
@@ -138,18 +103,12 @@ import Layout from '../../layouts/Layout.astro';
 
             const datePart = dateObj.toLocaleDateString('zh-TW', {
                 timeZone: 'Asia/Taipei',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
+                year: 'numeric', month: 'long', day: 'numeric'
             });
-
             const timePart = dateObj.toLocaleTimeString('zh-TW', {
                 timeZone: 'Asia/Taipei',
-                hour12: true,
-                hour: '2-digit',
-                minute: '2-digit'
+                hour12: true, hour: '2-digit', minute: '2-digit'
             });
-
             date.textContent = `${datePart} ${timePart}`;
             
             // 3. 內容摘要
@@ -162,42 +121,95 @@ import Layout from '../../layouts/Layout.astro';
             newsItem.appendChild(date);
             newsItem.appendChild(content);
             
-            output.appendChild(newsItem);
+            outputContainer.appendChild(newsItem);
         });
+    }
+
+    // ✨ 修改：引入 SWR (Stale-While-Revalidate) 快取策略的主邏輯
+    async function loadAllNews() {
+        const output = document.getElementById('all-news-output');
+        const loadingMessage = document.getElementById('loading-msg');
+        if (!output || !loadingMessage) return;
+
+        // --- SWR 階段 1：瞬間顯示上次的快取 ---
+        const cachedNews = localStorage.getItem('may_stock_news_cache');
+        if (cachedNews) {
+            try {
+                const parsedNews = JSON.parse(cachedNews);
+                loadingMessage.style.display = 'none'; // 有舊資料看，就不用顯示「讀取中」
+                renderNews(parsedNews, output);
+            } catch (e) {
+                console.error("解析快取失敗", e);
+            }
+        }
+
+        // --- SWR 階段 2：背景去抓最新資料 ---
+        try {
+            const allResults = await Promise.all(feeds.map(fetchFeed));
+            let combinedNews = allResults.flat();
+
+            if (combinedNews.length === 0 && !cachedNews) {
+                loadingMessage.style.display = 'none';
+                output.innerHTML = '<p class="error-msg">無法載入新聞資料，請檢查網路連線或稍後再試。</p>';
+                return;
+            }
+
+            if (combinedNews.length > 0) {
+                // 排序 (新 -> 舊)
+                combinedNews.sort((a, b) => {
+                    const dateA = new Date(a.pubDate.replace(/-/g, '/') + ' UTC').valueOf();
+                    const dateB = new Date(b.pubDate.replace(/-/g, '/') + ' UTC').valueOf();
+                    return dateB - dateA;
+                });
+
+                // 存入快取，供下次使用者打開網頁時瞬間載入用
+                localStorage.setItem('may_stock_news_cache', JSON.stringify(combinedNews));
+
+                // --- SWR 階段 3：無縫替換畫面上的新聞 ---
+                loadingMessage.style.display = 'none';
+                renderNews(combinedNews, output);
+
+                // UX 防呆：如果讀者剛才點了「半導體」分類，替換新資料後要幫他維持在半導體分類
+                const activeBtn = document.querySelector('.filter-btn.active');
+                if (activeBtn) activeBtn.click(); 
+            }
+        } catch (error) {
+            console.error("背景抓取最新新聞失敗:", error);
+            // 萬一 rss2json 伺服器掛了，至少畫面上有剛才印出來的舊快取可以看
+            if (!cachedNews) {
+                loadingMessage.style.display = 'none';
+                output.innerHTML = '<p class="error-msg">無法載入新聞資料，請檢查網路連線或稍後再試。</p>';
+            }
+        }
     }
 
     // 執行載入
     loadAllNews();
 
+    // --- 以下為導覽列微動、過濾器、回頂部按鈕，維持您原本的完美邏輯 ---
+
     // 導覽列微動暗示 (Nudge Effect)
     window.addEventListener('load', () => {
         const nav = document.getElementById('filter-nav');
-        // 檢查：只有當「內容總寬度」大於「螢幕寬度」時 (代表真的有被隱藏的按鈕)，才執行微動
         if (nav && nav.scrollWidth > nav.clientWidth) {
             setTimeout(() => {
-                // 1. 先往左滑動 40px
                 nav.scrollBy({ left: 40, behavior: 'smooth' });
-                
-                // 2. 過 400 毫秒後，再滑回原位
                 setTimeout(() => {
                     nav.scrollBy({ left: -40, behavior: 'smooth' });
                 }, 400);
-                
-            }, 600); // 網頁載入完成後等待 0.6 秒再彈跳，確保使用者有看到
+            }, 600);
         }
     });
     
-    // --- 過濾按鈕邏輯 ---
+    // 過濾按鈕邏輯
     const filterBtns = document.querySelectorAll('.filter-btn');
     const outputContainer = document.getElementById('all-news-output');
 
     filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            // 1. 切換 active 樣式
             filterBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
-            // 2. 執行過濾
             const targetTag = btn.getAttribute('data-filter');
             const allItems = outputContainer.querySelectorAll('.news-item');
 
@@ -211,7 +223,7 @@ import Layout from '../../layouts/Layout.astro';
         });
     });
 
-    // --- 回到頂部按鈕邏輯 ---
+    // 回到頂部按鈕邏輯
     const backToTopBtn = document.getElementById('back-to-top');
     if (backToTopBtn) {
         window.addEventListener('scroll', () => {

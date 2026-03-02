@@ -8,27 +8,32 @@ const allDaily = (await getCollection('daily'))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 5);
 
+// ✨ 修正：把 slug 改成 id 進行排序
 const allWeekly = (await getCollection('weekly'))
-  .sort((a, b) => b.slug.localeCompare(a.slug))
+  .sort((a, b) => b.id.localeCompare(a.id))
   .slice(0, 5);
 
+// ✨ 修正：把 slug 改成 id 進行排序
 const allMonthly = (await getCollection('monthly'))
-  .sort((a, b) => b.slug.localeCompare(a.slug))
+  .sort((a, b) => b.id.localeCompare(a.id))
   .slice(0, 5);
 
 // 2. 輔助函式：產生連結 (確保跟內頁邏輯一致)
-function getDailyUrl(slug: string) {
-  return `/${slug}/`;
+function getDailyUrl(id: string) {
+  const cleanId = id.replace(/\.md$/, ''); // ✨ 清除副檔名
+  return `/${cleanId}/`;
 }
 
-function getWeeklyUrl(slug: string) {
-  const [year, week] = slug.split('/');
+function getWeeklyUrl(id: string) {
+  const cleanId = id.replace(/\.md$/, ''); // ✨ 清除副檔名
+  const [year, week] = cleanId.split('/');
   // 去掉 W (大小寫通吃)
   return `/${year}/weekly/${week.replace(/[wW]/, '')}/`;
 }
 
-function getMonthlyUrl(slug: string) {
-  const [year, month] = slug.split('/');
+function getMonthlyUrl(id: string) {
+  const cleanId = id.replace(/\.md$/, ''); // ✨ 清除副檔名
+  const [year, month] = cleanId.split('/');
   // 去掉 M (大小寫通吃)
   return `/${year}/monthly/${month.replace(/[mM]/, '')}/`;
 }
@@ -47,7 +52,8 @@ function getMonthlyUrl(slug: string) {
       <ul>
         {allDaily.map((post) => (
           <li>
-            <a href={getDailyUrl(post.slug)}>
+            {/* ✨ 修正：傳入 post.id */}
+            <a href={getDailyUrl(post.id)}>
               {post.data.title}
             </a>
           </li>
@@ -60,7 +66,8 @@ function getMonthlyUrl(slug: string) {
       <ul>
         {allWeekly.map((post) => (
           <li>
-            <a href={getWeeklyUrl(post.slug)}>{post.data.title}</a>
+            {/* ✨ 修正：傳入 post.id */}
+            <a href={getWeeklyUrl(post.id)}>{post.data.title}</a>
           </li>
         ))}
       </ul>
@@ -71,7 +78,8 @@ function getMonthlyUrl(slug: string) {
       <ul>
         {allMonthly.map((post) => (
           <li>
-            <a href={getMonthlyUrl(post.slug)}>{post.data.title}</a>
+            {/* ✨ 修正：傳入 post.id */}
+            <a href={getMonthlyUrl(post.id)}>{post.data.title}</a>
           </li>
         ))}
       </ul>

@@ -10,23 +10,25 @@ export async function GET(context) {
   const allPosts = [
     // === 日報 ===
     ...daily.map(post => {
-      const [year, month, day] = post.slug.split('/');
+      const cleanId = post.id.replace(/\.md$/, ''); // ✨ 拿掉副檔名
+      const [year, month, day] = cleanId.split('/');
       return {
         title: post.data.title,
-        pubDate: post.data.date, // 直接使用 Frontmatter 中精確到分秒的真實時間
+        pubDate: post.data.date,
         description: `本文整理了${year}年${parseInt(month, 10)}月${parseInt(day, 10)}日台股盤後三大法人的交易動向。`,
-        link: `/${post.slug}/`,
+        link: `/${cleanId}/`, // ✨ 改用 cleanId
       };
     }),
 
     // === 週報 ===
     ...weekly.map(post => {
-      const [year, weekSlug] = post.slug.split('/');
+      const cleanId = post.id.replace(/\.md$/, ''); // ✨ 拿掉副檔名
+      const [year, weekSlug] = cleanId.split('/');
       const weekNum = parseInt(weekSlug.replace(/[wW]/, ''), 10);
       const urlWeek = weekNum.toString().padStart(2, '0');
       return {
         title: post.data.title,
-        pubDate: post.data.date, // 直接使用 Frontmatter 時間
+        pubDate: post.data.date,
         description: `本文整理了${year}年第${weekNum}週三大法人的交易動向。`,
         link: `/${year}/weekly/${urlWeek}/`,
       };
@@ -34,12 +36,13 @@ export async function GET(context) {
 
     // === 月報 ===
     ...monthly.map(post => {
-      const [year, monthSlug] = post.slug.split('/');
+      const cleanId = post.id.replace(/\.md$/, ''); // ✨ 拿掉副檔名
+      const [year, monthSlug] = cleanId.split('/');
       const monthNum = parseInt(monthSlug.replace(/[mM]/, ''), 10);
       const urlMonth = monthNum.toString().padStart(2, '0');
       return {
         title: post.data.title,
-        pubDate: post.data.date, // 直接使用 Frontmatter 時間
+        pubDate: post.data.date,
         description: `本文整理了${year}年${monthNum}月三大法人的交易動向。`,
         link: `/${year}/monthly/${urlMonth}/`,
       };
@@ -56,7 +59,7 @@ export async function GET(context) {
     title: '台股法人買賣超整理',
     description: '利用 AI 彙整台股盤後資訊，快速掌握市場動向。',
     site: context.site,
-    items: limitedPosts, // 因為前面的屬性已經整理成 rss 需要的格式了，可以直接塞進來
+    items: limitedPosts,
     customData: `<language>zh-TW</language>`,
   });
 }

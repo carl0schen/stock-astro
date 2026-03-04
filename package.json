@@ -4,9 +4,11 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro check && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "clean": "rm -rf .astro",
+    "fresh": "rm -rf .astro && astro dev"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.15",

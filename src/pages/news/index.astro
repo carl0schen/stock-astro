@@ -21,6 +21,11 @@ import Layout from '../../layouts/Layout.astro';
         <div class="news-section">
             <h1 class="page-title">最新市場與產業情報</h1>
             <div id="loading-msg" class="loading-message">讀取中...</div>
+            
+            <div id="empty-msg" class="empty-state-msg" style="display: none;">
+                目前此分類暫無最新新聞。
+            </div>
+
             <div id="all-news-output"></div>
         </div>
 
@@ -35,8 +40,12 @@ import Layout from '../../layouts/Layout.astro';
 </Layout>
 
 <script>
-    const newsToShowPerFeed = 15; // 每個來源抓取的數量
-    const apiKey = import.meta.env.PUBLIC_RSS_API_KEY;
+    const newsToShowPerFeed = 15;
+    
+    // 修改：換成您的 Worker URL 與 Token
+    // 請確保您的 .env 檔案中有 PUBLIC_WORKER_URL 和 PUBLIC_RSS_TOKEN
+    const workerUrl = import.meta.env.PUBLIC_WORKER_URL;
+    const rssToken = import.meta.env.PUBLIC_RSS_TOKEN;
 
     // 1. 定義您的 RSS 來源清單
     const feeds = [
@@ -48,14 +57,15 @@ import Layout from '../../layouts/Layout.astro';
 
     // 負責抓取單一 RSS 並將 tag 塞入資料中
     async function fetchFeed(feedDef) {
-        const timeStamp = new Date().getTime();
-        const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedDef.url)}&count=${newsToShowPerFeed}&api_key=${apiKey}&_t=${timeStamp}`;
+        // 修改：拔除 _t=${timeStamp}，將快取任務完美交給 Cloudflare Edge Server
+        const api = `${workerUrl}?url=${encodeURIComponent(feedDef.url)}&count=${newsToShowPerFeed}&token=${rssToken}`;
         
         try {
+            // 前端依舊不留快取，確保每次都去敲 Cloudflare (如果 CF 有快取就會秒回)
             const response = await fetch(api, { cache: 'no-store' });
             const data = await response.json();
             
-            if (data.status === 'ok' && data.items.length > 0) {
+            if (data.status === 'ok' && data.items && data.items.length > 0) {
                 return data.items.map(item => ({
                     ...item,
                     feedTag: feedDef.tag,
@@ -69,9 +79,9 @@ import Layout from '../../layouts/Layout.astro';
         }
     }
 
-    // ✨ 新增：負責將新聞資料轉換成 HTML 並印在畫面上的獨立函式
+    // 負責將新聞資料轉換成 HTML 並印在畫面上的獨立函式
     function renderNews(newsArray, outputContainer) {
-        outputContainer.innerHTML = ''; // 渲染前先清空容器，準備無縫替換
+        outputContainer.innerHTML = ''; 
 
         newsArray.forEach(item => {
             const newsItem = document.createElement('div');
@@ -125,25 +135,23 @@ import Layout from '../../layouts/Layout.astro';
         });
     }
 
-    // ✨ 修改：引入 SWR (Stale-While-Revalidate) 快取策略的主邏輯
+    // 引入 SWR (Stale-While-Revalidate) 快取策略的主邏輯
     async function loadAllNews() {
         const output = document.getElementById('all-news-output');
         const loadingMessage = document.getElementById('loading-msg');
         if (!output || !loadingMessage) return;
 
-        // --- SWR 階段 1：瞬間顯示上次的快取 ---
         const cachedNews = localStorage.getItem('may_stock_news_cache');
         if (cachedNews) {
             try {
                 const parsedNews = JSON.parse(cachedNews);
-                loadingMessage.style.display = 'none'; // 有舊資料看，就不用顯示「讀取中」
+                loadingMessage.style.display = 'none'; 
                 renderNews(parsedNews, output);
             } catch (e) {
                 console.error("解析快取失敗", e);
             }
         }
 
-        // --- SWR 階段 2：背景去抓最新資料 ---
         try {
             const allResults = await Promise.all(feeds.map(fetchFeed));
             let combinedNews = allResults.flat();
@@ -155,27 +163,22 @@ import Layout from '../../layouts/Layout.astro';
             }
 
             if (combinedNews.length > 0) {
-                // 排序 (新 -> 舊)
                 combinedNews.sort((a, b) => {
                     const dateA = new Date(a.pubDate.replace(/-/g, '/') + ' UTC').valueOf();
                     const dateB = new Date(b.pubDate.replace(/-/g, '/') + ' UTC').valueOf();
                     return dateB - dateA;
                 });
 
-                // 存入快取，供下次使用者打開網頁時瞬間載入用
                 localStorage.setItem('may_stock_news_cache', JSON.stringify(combinedNews));
 
-                // --- SWR 階段 3：無縫替換畫面上的新聞 ---
                 loadingMessage.style.display = 'none';
                 renderNews(combinedNews, output);
 
-                // UX 防呆：如果讀者剛才點了「半導體」分類，替換新資料後要幫他維持在半導體分類
                 const activeBtn = document.querySelector('.filter-btn.active');
                 if (activeBtn) activeBtn.click(); 
             }
         } catch (error) {
             console.error("背景抓取最新新聞失敗:", error);
-            // 萬一 rss2json 伺服器掛了，至少畫面上有剛才印出來的舊快取可以看
             if (!cachedNews) {
                 loadingMessage.style.display = 'none';
                 output.innerHTML = '<p class="error-msg">無法載入新聞資料，請檢查網路連線或稍後再試。</p>';
@@ -183,12 +186,8 @@ import Layout from '../../layouts/Layout.astro';
         }
     }
 
-    // 執行載入
     loadAllNews();
 
-    // --- 以下為導覽列微動、過濾器、回頂部按鈕，維持您原本的完美邏輯 ---
-
-    // 導覽列微動暗示 (Nudge Effect)
     window.addEventListener('load', () => {
         const nav = document.getElementById('filter-nav');
         if (nav && nav.scrollWidth > nav.clientWidth) {
@@ -201,9 +200,10 @@ import Layout from '../../layouts/Layout.astro';
         }
     });
     
-    // 過濾按鈕邏輯
+    // 修改：過濾按鈕邏輯 (加入計數器與空狀態判定)
     const filterBtns = document.querySelectorAll('.filter-btn');
     const outputContainer = document.getElementById('all-news-output');
+    const emptyMsg = document.getElementById('empty-msg'); // 取得空狀態區塊
 
     filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -212,18 +212,25 @@ import Layout from '../../layouts/Layout.astro';
 
             const targetTag = btn.getAttribute('data-filter');
             const allItems = outputContainer.querySelectorAll('.news-item');
+            
+            let visibleCount = 0; // 歸零計數器
 
             allItems.forEach(item => {
                 if (targetTag === 'all' || item.getAttribute('data-tag') === targetTag) {
                     item.style.display = 'block';
+                    visibleCount++; // 有顯示的項目就 +1
                 } else {
                     item.style.display = 'none';
                 }
             });
+
+            // 判斷是否需要顯示空狀態
+            if (emptyMsg) {
+                emptyMsg.style.display = visibleCount === 0 ? 'block' : 'none';
+            }
         });
     });
 
-    // 回到頂部按鈕邏輯
     const backToTopBtn = document.getElementById('back-to-top');
     if (backToTopBtn) {
         window.addEventListener('scroll', () => {
@@ -240,10 +247,10 @@ import Layout from '../../layouts/Layout.astro';
 </script>
 
 <style>
-    /* 黏性過濾導覽列樣式 */
+    /* ... 保持原本的上半部樣式不變 ... */
     .filter-nav-wrapper {
         position: sticky;
-        top: 0; 
+        top: 0;
         z-index: 100;
         background-color: #fff;
         margin-left: -1rem;
@@ -334,7 +341,6 @@ import Layout from '../../layouts/Layout.astro';
         gap: 0.5rem;
     }
 
-    /* 新增：新聞標籤樣式 */
     :global(.news-tag) {
         font-size: 0.75em;
         padding: 0.25em 0.6em;
@@ -344,11 +350,10 @@ import Layout from '../../layouts/Layout.astro';
         white-space: nowrap;
     }
 
-    /* 為不同主題設定專屬顏色 */
-    :global(.tag-tw) { background-color: #0366d6; }      /* 台股：藍色 */
-    :global(.tag-us) { background-color: #28a745; }      /* 美股：綠色 */
-    :global(.tag-semi) { background-color: #fd7e14; }    /* 半導體：橘黃色 */
-    :global(.tag-finance) { background-color: #6f42c1; } /* 財經焦點：紫色 */
+    :global(.tag-tw) { background-color: #0366d6; }      
+    :global(.tag-us) { background-color: #28a745; }      
+    :global(.tag-semi) { background-color: #fd7e14; }    
+    :global(.tag-finance) { background-color: #6f42c1; } 
 
     :global(.news-title-link) {
         color: #24292e; 
@@ -379,6 +384,18 @@ import Layout from '../../layouts/Layout.astro';
         border-radius: 6px;
     }
     .error-msg { color: #d73a49; }
+
+    /* ✨ 新增：空狀態提示樣式 */
+    .empty-state-msg {
+        text-align: center;
+        font-size: 1.1em;
+        color: #6a737d;
+        margin-top: 2em;
+        padding: 3em 2em;
+        background: #f6f8fa;
+        border-radius: 6px;
+        border: 2px dashed #eaeaea;
+    }
 
     .source-attribution {
         text-align: center;

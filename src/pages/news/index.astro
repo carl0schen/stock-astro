@@ -200,10 +200,10 @@ import Layout from '../../layouts/Layout.astro';
         }
     });
     
-    // 修改：過濾按鈕邏輯 (加入計數器與空狀態判定)
+    // 過濾按鈕邏輯
     const filterBtns = document.querySelectorAll('.filter-btn');
     const outputContainer = document.getElementById('all-news-output');
-    const emptyMsg = document.getElementById('empty-msg'); // 取得空狀態區塊
+    const emptyMsg = document.getElementById('empty-msg'); 
 
     filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -213,20 +213,29 @@ import Layout from '../../layouts/Layout.astro';
             const targetTag = btn.getAttribute('data-filter');
             const allItems = outputContainer.querySelectorAll('.news-item');
             
-            let visibleCount = 0; // 歸零計數器
+            // 新增：檢查畫面上是不是已經有「嚴重錯誤訊息」了
+            const hasError = outputContainer.querySelector('.error-msg') !== null; 
+            
+            let visibleCount = 0; 
 
             allItems.forEach(item => {
                 if (targetTag === 'all' || item.getAttribute('data-tag') === targetTag) {
                     item.style.display = 'block';
-                    visibleCount++; // 有顯示的項目就 +1
+                    visibleCount++; 
                 } else {
                     item.style.display = 'none';
                 }
             });
 
-            // 判斷是否需要顯示空狀態
+            // 修改：判斷邏輯升級
             if (emptyMsg) {
-                emptyMsg.style.display = visibleCount === 0 ? 'block' : 'none';
+                if (hasError) {
+                    // 如果 API 壞掉或被擋，已經有錯誤訊息了，就隱藏空狀態框
+                    emptyMsg.style.display = 'none'; 
+                } else {
+                    // 正常情況下，沒新聞才顯示空狀態框
+                    emptyMsg.style.display = visibleCount === 0 ? 'block' : 'none';
+                }
             }
         });
     });
@@ -394,7 +403,6 @@ import Layout from '../../layouts/Layout.astro';
         padding: 3em 2em;
         background: #f6f8fa;
         border-radius: 6px;
-        border: 2px dashed #eaeaea;
     }
 
     .source-attribution {

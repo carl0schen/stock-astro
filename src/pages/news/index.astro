@@ -124,8 +124,18 @@ import Layout from '../../layouts/Layout.astro';
             // 3. 內容摘要
             const content = document.createElement('p');
             content.classList.add('news-summary');
-            const cleanDescription = item.description.replace(/<[^>]*>?/gm, ''); 
-            content.textContent = cleanDescription.trim() + '...';
+            
+            // 升級解法：利用瀏覽器內建的 DOM 來「過濾標籤」與「解碼特殊符號」
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = item.description; 
+            
+            // 這時候 tempDiv 會自動把 &#8230; 解碼成真正的刪節號 …
+            let cleanText = tempDiv.textContent || tempDiv.innerText || '';
+            
+            // 把科技新報特有的 [...] 或 […] 清理乾淨，避免跟我們自己加的 ... 重複疊加
+            cleanText = cleanText.replace(/\[\s*…\s*\]/g, '').replace(/\[\s*\.\.\.\s*\]/g, '');
+
+            content.textContent = cleanText.trim() + '...';
 
             newsItem.appendChild(titleHeader);
             newsItem.appendChild(date);

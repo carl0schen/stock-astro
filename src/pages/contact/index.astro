@@ -3,21 +3,21 @@
 import Layout from '../../layouts/Layout.astro';
 ---
 
-<Layout 
-    title="聯絡我們" 
+<Layout
+    title="聯絡我們"
     description="如果您對本站的法人買賣超數據有疑問，或發現資料錯誤，歡迎透過此頁面聯絡站長。"
 >
   <div class="form-wrapper">
     <div class="form-container">
       <h2>聯絡我們</h2>
       <p class="info-text">如果資料有誤，歡迎透過下方表單聯繫。</p>
-      
+
       <form action="https://api.staticforms.xyz/submit" method="POST">
-          
+
           <input type="hidden" name="accessKey" value="sf_2f7f5630gckb73dd6g1g2jmd">
           <input type="hidden" name="redirectTo" value="https://stock.may.tw/contact/thanks">
           <input type="hidden" name="subject" value="來自 stock.may.tw 的新聯絡訊息">
-          
+
           <div class="ohnohoney">
               <label for="honeypot">請勿填寫此欄位</label>
               <input type="text" id="honeypot" name="honeypot" autocomplete="off">

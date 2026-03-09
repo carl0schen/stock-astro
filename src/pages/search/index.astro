@@ -2,8 +2,8 @@
 import Layout from '../../layouts/Layout.astro';
 ---
 
-<Layout 
-    title="資料搜尋" 
+<Layout
+    title="資料搜尋"
     description="查詢台股法人買賣超日報、週報與月報的歷史資料。"
 >
   <div class="search-wrapper">
@@ -15,7 +15,7 @@ import Layout from '../../layouts/Layout.astro';
         週報：2025W38<br>
         月報：2025M09
       </p>
-      
+
       <div class="input-group">
         <input type="text" id="dateInput" placeholder="例如：20250912" class="date-input" autofocus>
         <button id="searchBtn" class="date-button">前往</button>
@@ -33,10 +33,10 @@ import Layout from '../../layouts/Layout.astro';
 
   function goToPage() {
     if (!dateInput) return;
-    
+
     const input = dateInput.value.trim().toUpperCase();
     let redirectPath = '';
-    
+
     // 清除錯誤訊息
     if (errorMsg) errorMsg.style.display = 'none';
 
@@ -46,21 +46,21 @@ import Layout from '../../layouts/Layout.astro';
       const month = input.substring(4, 6);
       const day = input.substring(6, 8);
       redirectPath = `/${year}/${month}/${day}/`;
-    } 
+    }
     // 判斷是否為「週報」格式 (YYYYW[W])
     else if (/^\d{4}W\d{1,2}$/.test(input)) {
       const year = input.substring(0, 4);
       // 抓取 W 後面的數字，例如 2025W38 -> 38
       const week = input.substring(input.indexOf('W') + 1);
       redirectPath = `/${year}/weekly/${week}/`;
-    } 
+    }
     // 判斷是否為「月報」格式 (YYYYM[M])
     else if (/^\d{4}M\d{1,2}$/.test(input)) {
       const year = input.substring(0, 4);
       // 抓取 M 後面的數字，例如 2025M09 -> 09
       const month = input.substring(input.indexOf('M') + 1);
       redirectPath = `/${year}/monthly/${month}/`;
-    } 
+    }
     else {
       if (errorMsg) {
         errorMsg.textContent = '格式錯誤！請依照規則輸入 (例如: 20250912)';
@@ -70,7 +70,7 @@ import Layout from '../../layouts/Layout.astro';
       }
       return;
     }
-    
+
     window.location.href = redirectPath;
   }
 

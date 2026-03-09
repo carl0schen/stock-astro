@@ -5,7 +5,7 @@ import Layout from '../../../../layouts/Layout.astro';
 
 export async function getStaticPaths() {
   const allPosts = await getCollection('weekly');
-  
+
   // 改用 id 排序
   const sortedPosts = allPosts.sort((a, b) => a.id.localeCompare(b.id));
 
@@ -14,7 +14,7 @@ export async function getStaticPaths() {
     const cleanId = post.id.replace(/\.md$/, '');
     const parts = cleanId.split('/');
     const year = parts[0];
-    const rawWeek = parts[1]; 
+    const rawWeek = parts[1];
 
     const week = rawWeek.replace(/[wW]/, '');
 
@@ -22,7 +22,7 @@ export async function getStaticPaths() {
     const nextPost = index < sortedPosts.length - 1 ? sortedPosts[index + 1] : null;
 
     return {
-      params: { year, week }, 
+      params: { year, week },
       props: { post, prevPost, nextPost },
     };
   });

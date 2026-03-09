@@ -26,7 +26,7 @@ let finalDescription = propDescription;
 // 2. 【核心邏輯修正】
 // 條件增加：標題包含「法人買賣超整理」 且 [修改] 標題必須以「數字」開頭 (例如 2026...)
 if (!finalDescription && title.includes("法人買賣超整理") && /^\d/.test(title)) {
-   
+
   const datePart = title.split(' ')[0];
 
   if (title.includes("週報")) {
@@ -113,14 +113,14 @@ const socialImageURL = new URL(image, Astro.site);
     font-weight: 500;
     white-space: nowrap;
   }
-  
+
   /* 針對極小螢幕 (如 320px) 稍微縮小間距，讓排版更緊湊好看 */
   @media (max-width: 480px) {
     nav {
       gap: 1rem;
     }
   }
-    
+
   nav a:hover {
     color: #0366d6; /* Github 藍色 */
   }

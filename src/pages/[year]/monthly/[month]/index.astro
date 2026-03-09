@@ -5,7 +5,7 @@ import Layout from '../../../../layouts/Layout.astro';
 
 export async function getStaticPaths() {
   const allPosts = await getCollection('monthly');
-  
+
   const sortedPosts = allPosts.sort((a, b) => a.id.localeCompare(b.id));
 
   return sortedPosts.map((post, index) => {
@@ -13,7 +13,7 @@ export async function getStaticPaths() {
     const cleanId = post.id.replace(/\.md$/, '');
     const parts = cleanId.split('/');
     const year = parts[0];
-    const rawMonth = parts[1]; 
+    const rawMonth = parts[1];
 
     const month = rawMonth.replace(/[mM]/, '');
 
@@ -21,7 +21,7 @@ export async function getStaticPaths() {
     const nextPost = index < sortedPosts.length - 1 ? sortedPosts[index + 1] : null;
 
     return {
-      params: { year, month }, 
+      params: { year, month },
       props: { post, prevPost, nextPost },
     };
   });

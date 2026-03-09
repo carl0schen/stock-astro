@@ -3,8 +3,8 @@
 import Layout from '../../layouts/Layout.astro';
 ---
 
-<Layout 
-    title="台美股市與產業情報" 
+<Layout
+    title="台美股市與產業情報"
     description="彙整 Yahoo 股市與科技新報，提供最新台美股市動態、半導體產業與財經焦點新聞。"
 >
     <div class="filter-nav-wrapper">
@@ -21,7 +21,7 @@ import Layout from '../../layouts/Layout.astro';
         <div class="news-section">
             <h1 class="page-title">最新市場與產業情報</h1>
             <div id="loading-msg" class="loading-message">讀取中...</div>
-            
+
             <div id="empty-msg" class="empty-state-msg" style="display: none;">
                 目前此分類暫無最新新聞。
             </div>
@@ -30,7 +30,7 @@ import Layout from '../../layouts/Layout.astro';
         </div>
 
         <div class="source-attribution">
-            資料來源：<a href="https://tw.stock.yahoo.com/" target="_blank" rel="nofollow noopener noreferrer">Yahoo 奇摩股市</a> | <a href="https://technews.tw/" target="_blank" rel="nofollow noopener noreferrer">TechNews 科技新報</a> 
+            資料來源：<a href="https://tw.stock.yahoo.com/" target="_blank" rel="nofollow noopener noreferrer">Yahoo 奇摩股市</a> | <a href="https://technews.tw/" target="_blank" rel="nofollow noopener noreferrer">TechNews 科技新報</a>
         </div>
     </div>
 
@@ -41,7 +41,7 @@ import Layout from '../../layouts/Layout.astro';
 
 <script>
     const newsToShowPerFeed = 15;
-    
+
     // 修改：換成您的 Worker URL 與 Token
     // 請確保您的 .env 檔案中有 PUBLIC_WORKER_URL 和 PUBLIC_RSS_TOKEN
     const workerUrl = import.meta.env.PUBLIC_WORKER_URL;
@@ -59,12 +59,12 @@ import Layout from '../../layouts/Layout.astro';
     async function fetchFeed(feedDef) {
         // 修改：拔除 _t=${timeStamp}，將快取任務完美交給 Cloudflare Edge Server
         const api = `${workerUrl}?url=${encodeURIComponent(feedDef.url)}&count=${newsToShowPerFeed}&token=${rssToken}`;
-        
+
         try {
             // 前端依舊不留快取，確保每次都去敲 Cloudflare (如果 CF 有快取就會秒回)
             const response = await fetch(api, { cache: 'no-store' });
             const data = await response.json();
-            
+
             if (data.status === 'ok' && data.items && data.items.length > 0) {
                 return data.items.map(item => ({
                     ...item,
@@ -75,19 +75,19 @@ import Layout from '../../layouts/Layout.astro';
             return [];
         } catch (error) {
             console.error(`Error fetching ${feedDef.tag} RSS:`, error);
-            return []; 
+            return [];
         }
     }
 
     // 負責將新聞資料轉換成 HTML 並印在畫面上的獨立函式
     function renderNews(newsArray, outputContainer) {
-        outputContainer.innerHTML = ''; 
+        outputContainer.innerHTML = '';
 
         newsArray.forEach(item => {
             const newsItem = document.createElement('div');
             newsItem.classList.add('news-item');
             newsItem.setAttribute('data-tag', item.feedTag);
-            
+
             // 1. 標題與標籤
             const titleHeader = document.createElement('h2');
             const tagSpan = document.createElement('span');
@@ -99,15 +99,15 @@ import Layout from '../../layouts/Layout.astro';
             titleLink.textContent = item.title;
             titleLink.target = '_blank';
             titleLink.rel = 'noopener noreferrer';
-            titleLink.classList.add('news-title-link'); 
-            
+            titleLink.classList.add('news-title-link');
+
             titleHeader.appendChild(tagSpan);
             titleHeader.appendChild(titleLink);
 
             // 2. 日期
             const date = document.createElement('p');
             date.classList.add('news-date');
-            
+
             let rawDateStr = item.pubDate.replace(/-/g, '/') + ' UTC';
             let dateObj = new Date(rawDateStr);
 
@@ -120,18 +120,18 @@ import Layout from '../../layouts/Layout.astro';
                 hour12: true, hour: '2-digit', minute: '2-digit'
             });
             date.textContent = `${datePart} ${timePart}`;
-            
+
             // 3. 內容摘要
             const content = document.createElement('p');
             content.classList.add('news-summary');
-            
+
             // 升級解法：利用瀏覽器內建的 DOM 來「過濾標籤」與「解碼特殊符號」
             const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = item.description; 
-            
+            tempDiv.innerHTML = item.description;
+
             // 這時候 tempDiv 會自動把 &#8230; 解碼成真正的刪節號 …
             let cleanText = tempDiv.textContent || tempDiv.innerText || '';
-            
+
             // 把科技新報特有的 [...] 或 […] 清理乾淨，避免跟我們自己加的 ... 重複疊加
             cleanText = cleanText.replace(/\[\s*…\s*\]/g, '').replace(/\[\s*\.\.\.\s*\]/g, '');
 
@@ -140,7 +140,7 @@ import Layout from '../../layouts/Layout.astro';
             newsItem.appendChild(titleHeader);
             newsItem.appendChild(date);
             newsItem.appendChild(content);
-            
+
             outputContainer.appendChild(newsItem);
         });
     }
@@ -155,7 +155,7 @@ import Layout from '../../layouts/Layout.astro';
         if (cachedNews) {
             try {
                 const parsedNews = JSON.parse(cachedNews);
-                loadingMessage.style.display = 'none'; 
+                loadingMessage.style.display = 'none';
                 renderNews(parsedNews, output);
             } catch (e) {
                 console.error("解析快取失敗", e);
@@ -185,7 +185,7 @@ import Layout from '../../layouts/Layout.astro';
                 renderNews(combinedNews, output);
 
                 const activeBtn = document.querySelector('.filter-btn.active');
-                if (activeBtn) activeBtn.click(); 
+                if (activeBtn) activeBtn.click();
             }
         } catch (error) {
             console.error("背景抓取最新新聞失敗:", error);
@@ -209,11 +209,11 @@ import Layout from '../../layouts/Layout.astro';
             }, 600);
         }
     });
-    
+
     // 過濾按鈕邏輯
     const filterBtns = document.querySelectorAll('.filter-btn');
     const outputContainer = document.getElementById('all-news-output');
-    const emptyMsg = document.getElementById('empty-msg'); 
+    const emptyMsg = document.getElementById('empty-msg');
 
     filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -222,16 +222,16 @@ import Layout from '../../layouts/Layout.astro';
 
             const targetTag = btn.getAttribute('data-filter');
             const allItems = outputContainer.querySelectorAll('.news-item');
-            
+
             // 新增：檢查畫面上是不是已經有「嚴重錯誤訊息」了
-            const hasError = outputContainer.querySelector('.error-msg') !== null; 
-            
-            let visibleCount = 0; 
+            const hasError = outputContainer.querySelector('.error-msg') !== null;
+
+            let visibleCount = 0;
 
             allItems.forEach(item => {
                 if (targetTag === 'all' || item.getAttribute('data-tag') === targetTag) {
                     item.style.display = 'block';
-                    visibleCount++; 
+                    visibleCount++;
                 } else {
                     item.style.display = 'none';
                 }
@@ -241,7 +241,7 @@ import Layout from '../../layouts/Layout.astro';
             if (emptyMsg) {
                 if (hasError) {
                     // 如果 API 壞掉或被擋，已經有錯誤訊息了，就隱藏空狀態框
-                    emptyMsg.style.display = 'none'; 
+                    emptyMsg.style.display = 'none';
                 } else {
                     // 正常情況下，沒新聞才顯示空狀態框
                     emptyMsg.style.display = visibleCount === 0 ? 'block' : 'none';
@@ -290,7 +290,7 @@ import Layout from '../../layouts/Layout.astro';
     }
 
     .filter-nav::-webkit-scrollbar {
-        display: none; 
+        display: none;
     }
 
     @media (min-width: 768px) {
@@ -310,7 +310,7 @@ import Layout from '../../layouts/Layout.astro';
         border-radius: 20px;
         transition: all 0.2s ease;
     }
-    
+
     .filter-btn:hover {
         background-color: #f0f4f8;
         color: #0366d6;
@@ -324,7 +324,7 @@ import Layout from '../../layouts/Layout.astro';
 
     .news-container { padding-top: 2em; }
     .news-section { margin-bottom: 4em; }
-    
+
     .page-title {
         font-size: 1.8em;
         text-align: center;
@@ -337,18 +337,18 @@ import Layout from '../../layouts/Layout.astro';
 
     :global(.news-item) {
         border-bottom: 1px solid #eaeaea;
-        padding-bottom: 1.2em; 
+        padding-bottom: 1.2em;
         margin-bottom: 1.5em;
         animation: fadeIn 0.3s ease-in;
     }
-    
+
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(5px); }
         to { opacity: 1; transform: translateY(0); }
     }
-    
+
     :global(.news-item:last-child) { border-bottom: none; }
-    
+
     :global(.news-item h2) {
         font-size: 1.3em;
         font-weight: 600;
@@ -369,24 +369,24 @@ import Layout from '../../layouts/Layout.astro';
         white-space: nowrap;
     }
 
-    :global(.tag-tw) { background-color: #0366d6; }      
-    :global(.tag-us) { background-color: #28a745; }      
-    :global(.tag-semi) { background-color: #fd7e14; }    
-    :global(.tag-finance) { background-color: #6f42c1; } 
+    :global(.tag-tw) { background-color: #0366d6; }
+    :global(.tag-us) { background-color: #28a745; }
+    :global(.tag-semi) { background-color: #fd7e14; }
+    :global(.tag-finance) { background-color: #6f42c1; }
 
     :global(.news-title-link) {
-        color: #24292e; 
+        color: #24292e;
         text-decoration: none;
         transition: color 0.2s;
     }
-    
+
     :global(.news-title-link:hover) {
         color: #0366d6;
         text-decoration: underline;
     }
 
     :global(.news-date) { font-size: 0.85em; color: #586069; margin-bottom: 0.8em; }
-    
+
     :global(.news-summary) {
         line-height: 1.6;
         color: #444;

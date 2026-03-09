@@ -33,5 +33,5 @@
 
 ### 市場情報
 
-來源：Yahoo 奇摩股市（[台股盤後](https://tw.stock.yahoo.com/rss?q=台股盤後) / [美股盤後](https://tw.stock.yahoo.com/rss?q=美股盤後)）| TechnNews 科技新報（[半導體](https://technews.tw/category/semiconductor/feed) / [財經](https://finance.technews.tw/feed)）  
+來源：[Yahoo 奇摩股市](https://tw.stock.yahoo.com/) / [TechnNews 科技新報](https://technews.tw/)
 網址：[市場情報](https://stock.may.tw/news/)

@@ -200,7 +200,8 @@ import Layout from '../../layouts/Layout.astro';
 
     window.addEventListener('load', () => {
         const nav = document.getElementById('filter-nav');
-        if (nav && nav.scrollWidth > nav.clientWidth) {
+        // 升級：除了判斷寬度超出，還嚴格限制「只有在手機/平板尺寸 (寬度小於 768px)」才允許抖動
+        if (nav && nav.scrollWidth > nav.clientWidth && window.innerWidth < 768) {
             setTimeout(() => {
                 nav.scrollBy({ left: 40, behavior: 'smooth' });
                 setTimeout(() => {

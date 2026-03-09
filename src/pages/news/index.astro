@@ -14,6 +14,7 @@ import Layout from '../../layouts/Layout.astro';
             <button class="filter-btn" data-filter="美股盤後">美股盤後</button>
             <button class="filter-btn" data-filter="半導體">半導體產業</button>
             <button class="filter-btn" data-filter="財經焦點">財經焦點</button>
+            <button class="filter-btn" data-filter="債券市場">債券市場</button>
         </div>
     </div>
 
@@ -52,7 +53,8 @@ import Layout from '../../layouts/Layout.astro';
         { url: 'https://tw.stock.yahoo.com/rss?q=%E5%8F%B0%E8%82%A1%E7%9B%A4%E5%BE%8C', tag: '台股盤後', colorClass: 'tag-tw' },
         { url: 'https://tw.stock.yahoo.com/rss?q=%E7%BE%8E%E8%82%A1%E7%9B%A4%E5%BE%8C', tag: '美股盤後', colorClass: 'tag-us' },
         { url: 'https://technews.tw/category/semiconductor/feed', tag: '半導體', colorClass: 'tag-semi' },
-        { url: 'https://finance.technews.tw/feed', tag: '財經焦點', colorClass: 'tag-finance' }
+        { url: 'https://finance.technews.tw/feed', tag: '財經焦點', colorClass: 'tag-finance' },
+        { url: 'https://tw.stock.yahoo.com/rss?q=%E5%82%B5%E5%88%B8', tag: '債券市場', colorClass: 'tag-bond' }
     ];
 
     // 負責抓取單一 RSS 並將 tag 塞入資料中
@@ -374,6 +376,7 @@ import Layout from '../../layouts/Layout.astro';
     :global(.tag-us) { background-color: #28a745; }
     :global(.tag-semi) { background-color: #fd7e14; }
     :global(.tag-finance) { background-color: #6f42c1; }
+    :global(.tag-bond) { background-color: #17a2b8; }
 
     :global(.news-title-link) {
         color: #24292e;

@@ -1,5 +1,6 @@
 // src/content.config.ts  ← 注意位置移到 src/ 根目錄
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
+import { z } from 'astro/zod'; // 把 z 獨立出來從 astro/zod 引入
 import { glob } from 'astro/loaders';
 
 // 1. 日報

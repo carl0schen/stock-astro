@@ -12,10 +12,9 @@ import Layout from '../../layouts/Layout.astro';
       <h2>聯絡我們</h2>
       <p class="info-text">如果資料有誤，歡迎透過下方表單聯繫。</p>
 
-      <form action="https://api.staticforms.dev/submit" method="POST">
+      <form id="contact-form" action="https://api.staticforms.dev/submit" method="POST">
 
           <input type="hidden" name="accessKey" value="sf_2f7f5630gckb73dd6g1g2jmd">
-          <input type="hidden" name="redirectTo" value="https://stock.may.tw/contact/thanks">
           <input type="hidden" name="subject" value="來自 stock.may.tw 的新聯絡訊息">
 
           <div class="ohnohoney">
@@ -38,14 +37,89 @@ import Layout from '../../layouts/Layout.astro';
               <textarea id="message" name="message" class="form-textarea" placeholder="請輸入您的訊息..." required></textarea>
           </div>
 
-          <button type="submit" class="submit-button">送出訊息</button>
+          <button type="submit" id="submit-btn" class="submit-button">送出訊息</button>
+
+          <div id="form-message" class="form-message" style="display: none;"></div>
       </form>
     </div>
   </div>
 </Layout>
 
+<script>
+  // 新增：攔截表單送出的非同步邏輯
+  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+  const formMessage = document.getElementById('form-message') as HTMLDivElement;
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault(); // 阻止瀏覽器預設的跳轉行為
+
+      // 1. 改變按鈕狀態，防止重複點擊
+      submitBtn.disabled = true;
+      submitBtn.textContent = '傳送中...';
+      submitBtn.style.opacity = '0.7';
+      formMessage.style.display = 'none';
+      formMessage.className = 'form-message'; // 重置 class
+
+      // 2. 收集表單資料
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      try { // 這裡開始 try
+        // 3. 呼叫 staticforms API
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json' // 告訴伺服器我們想要 JSON 回應，不要跳轉
+          }
+        });
+
+        const result = await response.json();
+
+        // 4. 處理回傳結果
+        if (result.success) {
+          formMessage.textContent = '✓ 訊息已成功送出！感謝您的聯繫。';
+          formMessage.classList.add('success');
+          formMessage.style.display = 'block';
+          form.reset(); // 清空表單
+
+          // 新增：3 秒後開始「淡出」動畫
+          setTimeout(() => {
+            formMessage.classList.add('fade-out'); // 加上淡出的 CSS class
+
+            // 等淡出動畫跑完 (0.5秒) 後，再真正把元素隱藏並重置狀態
+            setTimeout(() => {
+              formMessage.style.display = 'none';
+              formMessage.classList.remove('success', 'fade-out');
+            }, 500);
+
+          }, 3000); // 3秒後觸發
+
+        } else {
+          formMessage.textContent = '送出失敗，請檢查內容或稍後再試。';
+          formMessage.classList.add('error');
+          formMessage.style.display = 'block';
+          // 註：錯誤訊息通常不設定自動消失，讓使用者有時間閱讀
+        }
+      } catch (error) {
+        formMessage.textContent = '網路連線異常，請稍後再試。';
+        formMessage.classList.add('error');
+        formMessage.style.display = 'block';
+      } finally {
+        // 5. 恢復按鈕狀態
+        submitBtn.disabled = false;
+        submitBtn.textContent = '送出訊息';
+        submitBtn.style.opacity = '1';
+      }
+    });
+  }
+</script>
+
 <style>
-  /* 讓表單在畫面置中 */
+  /* --- 保持原本上半部的樣式不變 --- */
   .form-wrapper {
     display: flex;
     justify-content: center;
@@ -76,7 +150,7 @@ import Layout from '../../layouts/Layout.astro';
     font-size: 1rem;
     border: 1px solid #ccc;
     border-radius: 6px;
-    box-sizing: border-box; /* 重要：防止 padding 撐爆寬度 */
+    box-sizing: border-box;
     font-family: inherit;
   }
 
@@ -98,11 +172,11 @@ import Layout from '../../layouts/Layout.astro';
     cursor: pointer;
     font-weight: 600;
     margin-top: 0.5rem;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
   }
   .submit-button:hover { background-color: #024ea4; }
+  .submit-button:disabled { cursor: not-allowed; }
 
-  /* 隱藏 Honeypot */
   .ohnohoney {
     opacity: 0;
     position: absolute;
@@ -111,5 +185,42 @@ import Layout from '../../layouts/Layout.astro';
     height: 0;
     width: 0;
     z-index: -1;
+  }
+
+  /* 新增：提示訊息框的樣式 */
+  .form-message {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    animation: fadeIn 0.3s ease-in;
+  }
+
+  .form-message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+
+  .form-message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 新增：淡出動畫的專屬 class 與 keyframes */
+  .form-message.fade-out {
+    animation: fadeOut 0.5s ease-out forwards;
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-5px); }
   }
 </style>

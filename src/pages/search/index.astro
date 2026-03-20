@@ -8,7 +8,7 @@ import Layout from '../../layouts/Layout.astro';
 >
   <div class="search-wrapper">
     <div class="search-container">
-      <h2>輸入日期前往文章</h2>
+      <h1>輸入日期前往文章</h1>
       <p class="info-text">
         輸入規則：<br>
         日報：20250912<br>
@@ -89,6 +89,15 @@ import Layout from '../../layouts/Layout.astro';
 </script>
 
 <style>
+  /* H1 (主標題)：保留底線，控制大小 */
+  h1 {
+    font-size: 1.8rem;
+    border-bottom: 2px solid #eaeaea; /* 保留這條優雅的底線 */
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+    color: #24292e;
+  }
+
   /* 讓搜尋框在畫面中垂直置中，但扣掉 Header 的高度 */
   .search-wrapper {
     display: flex;
@@ -100,18 +109,12 @@ import Layout from '../../layouts/Layout.astro';
   .search-container {
     text-align: center;
     padding: 2.5rem;
-    background-color: #f8f9fa; /* 稍微灰一點的背景凸顯區塊 */
+    background-color: #f8f9fa;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     width: 100%;
-    max-width: 400px; /* 限制最大寬度 */
-  }
-
-  h2 {
-    font-size: 1.5rem;
-    margin-top: 0;
-    margin-bottom: 1.5rem;
-    color: #333;
+    max-width: 400px;
+    box-sizing: border-box; /* 防止 padding 撐爆寬度 */
   }
 
   .info-text {
@@ -166,5 +169,12 @@ import Layout from '../../layouts/Layout.astro';
     font-size: 0.9rem;
     margin-top: 1rem;
     display: none; /* 預設隱藏 */
+  }
+
+  /* 新增：針對手機螢幕縮小灰框內距，讓內容空間變大 */
+  @media (max-width: 480px) {
+    .search-container {
+      padding: 1.5rem; /* 把原本的 2.5rem 縮小，釋放左右空間 */
+    }
   }
 </style>

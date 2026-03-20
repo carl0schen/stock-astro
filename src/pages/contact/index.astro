@@ -9,7 +9,7 @@ import Layout from '../../layouts/Layout.astro';
 >
   <div class="form-wrapper">
     <div class="form-container">
-      <h2>聯絡我們</h2>
+      <h1>聯絡我們</h1>
       <p class="info-text">如果資料有誤，歡迎透過下方表單聯繫。</p>
 
       <form id="contact-form" action="https://api.staticforms.dev/submit" method="POST">
@@ -119,6 +119,15 @@ import Layout from '../../layouts/Layout.astro';
 </script>
 
 <style>
+  /* H1 (主標題)：保留底線，控制大小 */
+  h1 {
+    font-size: 1.8rem;
+    border-bottom: 2px solid #eaeaea; /* 保留這條優雅的底線 */
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+    color: #24292e;
+  }
+
   /* --- 保持原本上半部的樣式不變 --- */
   .form-wrapper {
     display: flex;
@@ -135,10 +144,14 @@ import Layout from '../../layouts/Layout.astro';
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     width: 100%;
     max-width: 400px;
+    box-sizing: border-box; /* 防止 padding 撐爆寬度 */
   }
 
-  h2 { margin-top: 0; margin-bottom: 1rem; font-size: 1.5rem; }
-  .info-text { font-size: 0.9rem; color: #666; margin-bottom: 1.5rem; }
+  @media (max-width: 480px) {
+    .form-container {
+      padding: 1.5rem;
+    }
+  }
 
   .form-group { margin-bottom: 1rem; text-align: left; }
   .form-label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; color: #333; }

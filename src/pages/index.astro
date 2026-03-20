@@ -8,31 +8,31 @@ const allDaily = (await getCollection('daily'))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 5);
 
-// ✨ 修正：把 slug 改成 id 進行排序
+// 修正：把 slug 改成 id 進行排序
 const allWeekly = (await getCollection('weekly'))
   .sort((a, b) => b.id.localeCompare(a.id))
   .slice(0, 5);
 
-// ✨ 修正：把 slug 改成 id 進行排序
+// 修正：把 slug 改成 id 進行排序
 const allMonthly = (await getCollection('monthly'))
   .sort((a, b) => b.id.localeCompare(a.id))
   .slice(0, 5);
 
 // 2. 輔助函式：產生連結 (確保跟內頁邏輯一致)
 function getDailyUrl(id: string) {
-  const cleanId = id.replace(/\.md$/, ''); // ✨ 清除副檔名
+  const cleanId = id.replace(/\.md$/, ''); // 清除副檔名
   return `/${cleanId}/`;
 }
 
 function getWeeklyUrl(id: string) {
-  const cleanId = id.replace(/\.md$/, ''); // ✨ 清除副檔名
+  const cleanId = id.replace(/\.md$/, ''); // 清除副檔名
   const [year, week] = cleanId.split('/');
   // 去掉 W (大小寫通吃)
   return `/${year}/weekly/${week.replace(/[wW]/, '')}/`;
 }
 
 function getMonthlyUrl(id: string) {
-  const cleanId = id.replace(/\.md$/, ''); // ✨ 清除副檔名
+  const cleanId = id.replace(/\.md$/, ''); // 清除副檔名
   const [year, month] = cleanId.split('/');
   // 去掉 M (大小寫通吃)
   return `/${year}/monthly/${month.replace(/[mM]/, '')}/`;
@@ -42,17 +42,17 @@ function getMonthlyUrl(id: string) {
 <Layout title="台股法人買賣超整理">
 
   <section class="intro-section">
-    <h2>台股法人買賣超整理</h2>
+    <h1>台股法人買賣超整理</h1>
     <p>利用 AI 彙整台股盤後資訊，快速掌握市場動向。</p>
   </section>
 
   <section class="latest-posts">
     <div class="post-group">
-      <h3>最新日報</h3>
+      <h2>最新日報</h2>
       <ul>
         {allDaily.map((post) => (
           <li>
-            {/* ✨ 修正：傳入 post.id */}
+            {/* 修正：傳入 post.id */}
             <a href={getDailyUrl(post.id)}>
               {post.data.title}
             </a>
@@ -62,11 +62,11 @@ function getMonthlyUrl(id: string) {
     </div>
 
     <div class="post-group">
-      <h3>最新週報</h3>
+      <h2>最新週報</h2>
       <ul>
         {allWeekly.map((post) => (
           <li>
-            {/* ✨ 修正：傳入 post.id */}
+            {/* 修正：傳入 post.id */}
             <a href={getWeeklyUrl(post.id)}>{post.data.title}</a>
           </li>
         ))}
@@ -74,11 +74,11 @@ function getMonthlyUrl(id: string) {
     </div>
 
     <div class="post-group">
-      <h3>最新月報</h3>
+      <h2>最新月報</h2>
       <ul>
         {allMonthly.map((post) => (
           <li>
-            {/* ✨ 修正：傳入 post.id */}
+            {/* 修正：傳入 post.id */}
             <a href={getMonthlyUrl(post.id)}>{post.data.title}</a>
           </li>
         ))}
@@ -89,7 +89,7 @@ function getMonthlyUrl(id: string) {
   <hr />
 
   <section class="info-section">
-    <h3>資料來源</h3>
+    <h2>資料來源</h2>
     <ul>
       <li><strong>日報</strong>
         <ul>
@@ -114,22 +114,22 @@ function getMonthlyUrl(id: string) {
       </li>
     </ul>
 
-    <h3>搜尋與彙整</h3>
+    <h2>搜尋與彙整</h2>
     <p>
       如需查詢歷史資料，可使用 <a href="/search/">搜尋頁面</a> 輸入日期，或是前往 <a href="https://github.com/carl0schen/astro-stock" target="_blank" rel="nofollow noopener noreferrer">GitHub</a> 直接檢視原始檔案。
     </p>
 
-    <h3>聯絡我們</h3>
+    <h2>聯絡我們</h2>
     <p>如果資料有誤，歡迎來信告知：<a href="/contact/">聯絡頁面</a></p>
 
-    <h3>文章訂閱</h3>
+    <h2>文章訂閱</h2>
     <ul>
       <li><strong>RSS 訂閱：</strong> <a href="/rss.xml">https://stock.may.tw/rss.xml</a></li>
       <li><strong>電子郵件訂閱：</strong> 使用 <a href="https://feedrabbit.com/" target="_blank" rel="nofollow noopener noreferrer">Feedrabbit</a> 服務。</li>
       <li><strong>Telegram 訂閱：</strong> 使用 <a href="https://t.me/RSStT_Bot" target="_blank" rel="nofollow noopener noreferrer">RSS-to-Telegram-Bot</a>。</li>
     </ul>
 
-    <h3>市場情報</h3>
+    <h2>市場情報</h2>
     <p>
       來源：<a href="https://tw.stock.yahoo.com/" target="_blank" rel="nofollow noopener noreferrer">Yahoo 奇摩股市</a> / <a href="https://technews.tw/" target="_blank" rel="nofollow noopener noreferrer">TechNews 科技新報</a> <br>
       網址：<a href="/news/">市場情報</a>
@@ -139,9 +139,24 @@ function getMonthlyUrl(id: string) {
 </Layout>
 
 <style>
-  /* 讓首頁的標題稍微明顯一點 */
-  h2 { border-bottom: 2px solid #eaeaea; padding-bottom: 0.5rem; margin-top: 0; }
-  h3 { margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+  /* 1. H1 (主標題)：保留底線，控制大小 */
+  h1 {
+    font-size: 1.8rem;
+    border-bottom: 2px solid #eaeaea; /* 保留這條優雅的底線 */
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+    color: #24292e;
+  }
+
+  /* 2. H2 (副標題)：強制拔除被 GitHub CSS 賦予的底線！ */
+  h2 {
+    border-bottom: none; /* 關鍵魔法：拔除底線 */
+    padding-bottom: 0;   /* 順便把 GitHub 預設留的底線內距歸零 */
+    font-size: 1.3rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+  }
 
   /* 動態列表的樣式 */
   .latest-posts {
@@ -187,7 +202,7 @@ function getMonthlyUrl(id: string) {
   }
 
   /* 新增：修正首頁灰色區塊的標題上方間距 */
-  .latest-posts h3 {
+  .latest-posts h2 {
     margin-top: 0;
   }
 

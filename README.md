@@ -19,7 +19,7 @@
 
 ### 搜尋與彙整
 
-如需查詢歷史資料，可使用 [搜尋頁面](https://stock.may.tw/search/) 輸入日期，或是前往 [GitHub](https://github.com/carl0schen/astro-stock) 直接檢視原始檔案。
+如需查詢歷史資料，可使用 [搜尋頁面](https://stock.may.tw/search/) 輸入日期，或是前往 [GitHub](https://github.com/carl0schen/stock-astro) 直接檢視原始檔案。
 
 ### 聯絡我們
 

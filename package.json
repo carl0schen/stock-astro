@@ -11,9 +11,9 @@
     "fresh": "rm -rf .astro && astro dev"
   },
   "dependencies": {
-    "@astrojs/rss": "^4.0.17",
-    "@astrojs/sitemap": "^3.7.1",
-    "astro": "^6.0.7",
+    "@astrojs/rss": "^4.0.18",
+    "@astrojs/sitemap": "^3.7.2",
+    "astro": "^6.1.1",
     "rehype-external-links": "^3.0.0"
   }
 }

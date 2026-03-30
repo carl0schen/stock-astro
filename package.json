@@ -8,7 +8,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "clean": "rm -rf .astro",
-    "fresh": "rm -rf .astro && astro dev"
+    "fresh": "rm -rf .astro node_modules/.vite && astro dev"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.18",

@@ -1,0 +1,27 @@
+name: Mirror to GitLab
+
+on:
+  push:
+    branches: [ "main" ] # 如果你的主分支叫 master 請改成 master
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 確保抓取所有歷史紀錄與分支
+
+      - name: Push to GitLab
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          GITLAB_USERNAME: "carl0schen" # 請替換為實際帳號
+          GITLAB_REPO: "stock-astro" # 請替換為 GitLab 上的專案名稱
+        run: |
+          # 組合含有 Token 的認證網址
+          REMOTE_URL="https://oauth2:${GITLAB_TOKEN}@gitlab.com/${GITLAB_USERNAME}/${GITLAB_REPO}.git"
+
+          # 將 GitLab 加入遠端節點並強制推送所有更新
+          git remote add gitlab $REMOTE_URL
+          git push --mirror gitlab

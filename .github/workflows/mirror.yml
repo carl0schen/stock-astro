@@ -27,10 +27,13 @@ jobs:
       - name: Push to Bitbucket
         env:
           BITBUCKET_PASSWORD: ${{ secrets.BITBUCKET_PASSWORD }}
-          BITBUCKET_WORKSPACE: "carl0schen" # 通常是你的帳號名稱
-          BITBUCKET_REPO: "stock-astro"
+          BITBUCKET_USERNAME: "carl0schen-admin" # 新增：你的實際登入帳號
+          BITBUCKET_WORKSPACE: "carl0schen"      # 維持：你的工作區名稱
+          BITBUCKET_REPO: "stock-astro"          # 專案名稱
         run: |
-          # Bitbucket 的認證網址格式不同
-          git remote add bitbucket "https://${BITBUCKET_WORKSPACE}:${BITBUCKET_PASSWORD}@bitbucket.org/${BITBUCKET_WORKSPACE}/${BITBUCKET_REPO}.git"
+          # 重新組合正確的認證網址
+          git remote add bitbucket "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@bitbucket.org/${BITBUCKET_WORKSPACE}/${BITBUCKET_REPO}.git"
+
+          # 將 GitHub 的所有分支與標籤強制推送到 Bitbucket
           git push bitbucket "refs/remotes/origin/*:refs/heads/*" --force
           git push bitbucket "refs/tags/*:refs/tags/*" --force

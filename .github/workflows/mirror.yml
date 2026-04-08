@@ -1,4 +1,4 @@
-name: Mirror to GitLab and Bitbucket
+name: Mirror to GitLab
 
 on:
   push:
@@ -17,23 +17,9 @@ jobs:
       - name: Push to GitLab
         env:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
-          GITLAB_USERNAME: "carl0schen" # 你的 GitLab 帳號
+          GITLAB_USERNAME: "carl0schen"
           GITLAB_REPO: "stock-astro"
         run: |
           git remote add gitlab "https://oauth2:${GITLAB_TOKEN}@gitlab.com/${GITLAB_USERNAME}/${GITLAB_REPO}.git"
           git push gitlab "refs/remotes/origin/*:refs/heads/*" --force
           git push gitlab "refs/tags/*:refs/tags/*" --force
-
-      - name: Push to Bitbucket
-        env:
-          BITBUCKET_PASSWORD: ${{ secrets.BITBUCKET_PASSWORD }}
-          BITBUCKET_USERNAME: "carl0schen-admin" # 新增：你的實際登入帳號
-          BITBUCKET_WORKSPACE: "carl0schen"      # 維持：你的工作區名稱
-          BITBUCKET_REPO: "stock-astro"          # 專案名稱
-        run: |
-          # 重新組合正確的認證網址
-          git remote add bitbucket "https://${BITBUCKET_USERNAME}:${BITBUCKET_PASSWORD}@bitbucket.org/${BITBUCKET_WORKSPACE}/${BITBUCKET_REPO}.git"
-
-          # 將 GitHub 的所有分支與標籤強制推送到 Bitbucket
-          git push bitbucket "refs/remotes/origin/*:refs/heads/*" --force
-          git push bitbucket "refs/tags/*:refs/tags/*" --force

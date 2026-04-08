@@ -1,9 +1,9 @@
-name: Mirror to GitLab
+name: Mirror to GitLab and Bitbucket
 
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch: # 手動觸發按鈕
+  workflow_dispatch:
 
 jobs:
   mirror:
@@ -12,20 +12,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # 確保抓取所有歷史紀錄與分支
+          fetch-depth: 0
 
       - name: Push to GitLab
         env:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
-          GITLAB_USERNAME: "carl0schen" # 請替換為實際帳號
-          GITLAB_REPO: "stock-astro" # 請替換為 GitLab 上的專案名稱
+          GITLAB_USERNAME: "carl0schen" # 你的 GitLab 帳號
+          GITLAB_REPO: "stock-astro"
         run: |
-          # 組合含有 Token 的認證網址
-          REMOTE_URL="https://oauth2:${GITLAB_TOKEN}@gitlab.com/${GITLAB_USERNAME}/${GITLAB_REPO}.git"
-
-          # 將 GitLab 加入遠端節點
-          git remote add gitlab $REMOTE_URL
-
-          # 改用這種方式：將 GitHub 的所有分支與標籤強制推送到 GitLab，避開隱藏的快取節點
+          git remote add gitlab "https://oauth2:${GITLAB_TOKEN}@gitlab.com/${GITLAB_USERNAME}/${GITLAB_REPO}.git"
           git push gitlab "refs/remotes/origin/*:refs/heads/*" --force
           git push gitlab "refs/tags/*:refs/tags/*" --force
+
+      - name: Push to Bitbucket
+        env:
+          BITBUCKET_PASSWORD: ${{ secrets.BITBUCKET_PASSWORD }}
+          BITBUCKET_WORKSPACE: "carl0schen" # 通常是你的帳號名稱
+          BITBUCKET_REPO: "stock-astro"
+        run: |
+          # Bitbucket 的認證網址格式不同
+          git remote add bitbucket "https://${BITBUCKET_WORKSPACE}:${BITBUCKET_PASSWORD}@bitbucket.org/${BITBUCKET_WORKSPACE}/${BITBUCKET_REPO}.git"
+          git push bitbucket "refs/remotes/origin/*:refs/heads/*" --force
+          git push bitbucket "refs/tags/*:refs/tags/*" --force

@@ -2,7 +2,8 @@ name: Mirror to GitLab
 
 on:
   push:
-    branches: [ "main" ] # 如果你的主分支叫 master 請改成 master
+    branches: [ "main" ]
+  workflow_dispatch: # 手動觸發按鈕
 
 jobs:
   mirror:

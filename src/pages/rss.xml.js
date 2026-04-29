@@ -62,6 +62,7 @@ export async function GET(context) {
     title: '台股法人買賣超整理',
     description: '利用 AI 彙整台股盤後資訊，快速掌握市場動向。',
     site: context.site,
+    xmlns: { atom: 'http://www.w3.org/2005/Atom' },
     items: limitedPosts,
     customData: `
       <language>zh-TW</language>

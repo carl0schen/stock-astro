@@ -55,11 +55,18 @@ export async function GET(context) {
   // 4. 限制最新 20 篇
   const limitedPosts = allPosts.slice(0, 20);
 
+  // 取得完整的 RSS 網址 (例如: https://stock.may.tw/rss.xml)
+  const feedUrl = new URL('rss.xml', context.site).href;
+
   return rss({
     title: '台股法人買賣超整理',
     description: '利用 AI 彙整台股盤後資訊，快速掌握市場動向。',
     site: context.site,
     items: limitedPosts,
-    customData: `<language>zh-TW</language>`,
+    customData: `
+      <language>zh-TW</language>
+      <atom:link href="${feedUrl}" rel="self" type="application/rss+xml" />
+      <atom:link href="https://pubsubhubbub.appspot.com/" rel="hub" />
+    `,
   });
 }

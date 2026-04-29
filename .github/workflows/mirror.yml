@@ -1,4 +1,4 @@
-name: Mirror to GitLab
+name: Deploy, Mirror and Ping WebSub
 
 on:
   push:
@@ -23,3 +23,20 @@ jobs:
           git remote add gitlab "https://oauth2:${GITLAB_TOKEN}@gitlab.com/${GITLAB_USERNAME}/${GITLAB_REPO}.git"
           git push gitlab "refs/remotes/origin/*:refs/heads/*" --force
           git push gitlab "refs/tags/*:refs/tags/*" --force
+
+  # 新增的 Job：Ping WebSub Hub
+  ping-websub:
+    runs-on: ubuntu-latest
+    # 確保這個任務會和 mirror 平行執行，節省總時間
+    steps:
+      - name: Wait for Cloudflare Pages Deployment
+        # 關鍵：等待 120 秒，確保您的網站已經順利編譯並上線
+        run: sleep 120
+
+      - name: Ping Google WebSub Hub
+        # 透過 curl 發送 POST 請求給 Google Hub
+        run: |
+          curl -s -X POST "https://pubsubhubbub.appspot.com/" \
+          -d "hub.mode=publish" \
+          -d "hub.url=https://stock.may.tw/rss.xml" \
+          -w "\nWebSub Ping HTTP Status: %{http_code}\n"

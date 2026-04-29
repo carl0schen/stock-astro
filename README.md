@@ -28,10 +28,10 @@
 ### 文章訂閱
 
 - **RSS 訂閱：**[https://stock.may.tw/rss.xml](https://stock.may.tw/rss.xml)
-- **電子郵件訂閱：** 使用 [Feedrabbit](https://feedrabbit.com/) 服務。
+- **電子郵件訂閱：** 使用 [Blogtrottr](https://blogtrottr.com/) 服務。
 - **Telegram 訂閱：** 使用 [RSS-to-Telegram-Bot](https://t.me/RSStT_Bot)。
 
 ### 市場情報
 
-來源：[Yahoo 奇摩股市](https://tw.stock.yahoo.com/) / [TechnNews 科技新報](https://technews.tw/)  
+來源：[Yahoo 奇摩股市](https://tw.stock.yahoo.com/) / [TechnNews 科技新報](https://technews.tw/)\
 網址：[市場情報](https://stock.may.tw/news/)

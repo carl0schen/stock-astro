@@ -33,10 +33,9 @@ jobs:
         # 關鍵：等待 120 秒，確保您的網站已經順利編譯並上線
         run: sleep 120
 
-      - name: Ping Google WebSub Hub
-        # 透過 curl 發送 POST 請求給 Google Hub
+      - name: Ping WebSubHub
         run: |
-          curl -s -X POST "https://pubsubhubbub.appspot.com/" \
+          curl -s -X POST "https://websubhub.com/hub" \
           -d "hub.mode=publish" \
           -d "hub.url=https://stock.may.tw/rss.xml" \
           -w "\nWebSub Ping HTTP Status: %{http_code}\n"

@@ -37,5 +37,5 @@ jobs:
         run: |
           curl -s -X POST "https://websubhub.com/hub" \
           -d "hub.mode=publish" \
-          -d "hub.url=https://stock.may.tw/rss.xml" \
+          -d "hub.topic=https://stock.may.tw/rss.xml" \
           -w "\nWebSub Ping HTTP Status: %{http_code}\n"

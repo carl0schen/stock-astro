@@ -67,7 +67,7 @@ export async function GET(context) {
     customData: `
       <language>zh-TW</language>
       <atom:link href="${feedUrl}" rel="self" type="application/rss+xml" />
-      <atom:link href="https://pubsubhubbub.appspot.com/" rel="hub" />
+      <atom:link href="https://pubsubhubbub.superfeedr.com/" rel="hub" />
     `,
   });
 }

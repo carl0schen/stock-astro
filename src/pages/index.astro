@@ -3,38 +3,32 @@
 import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 
-// 1. 抓取資料並排序 (只取最新 5 筆)
 const allDaily = (await getCollection('daily'))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 5);
 
-// 修正：把 slug 改成 id 進行排序
 const allWeekly = (await getCollection('weekly'))
   .sort((a, b) => b.id.localeCompare(a.id))
   .slice(0, 5);
 
-// 修正：把 slug 改成 id 進行排序
 const allMonthly = (await getCollection('monthly'))
   .sort((a, b) => b.id.localeCompare(a.id))
   .slice(0, 5);
 
-// 2. 輔助函式：產生連結 (確保跟內頁邏輯一致)
 function getDailyUrl(id: string) {
-  const cleanId = id.replace(/\.md$/, ''); // 清除副檔名
+  const cleanId = id.replace(/\.md$/, '');
   return `/${cleanId}/`;
 }
 
 function getWeeklyUrl(id: string) {
-  const cleanId = id.replace(/\.md$/, ''); // 清除副檔名
+  const cleanId = id.replace(/\.md$/, '');
   const [year, week] = cleanId.split('/');
-  // 去掉 W (大小寫通吃)
   return `/${year}/weekly/${week.replace(/[wW]/, '')}/`;
 }
 
 function getMonthlyUrl(id: string) {
-  const cleanId = id.replace(/\.md$/, ''); // 清除副檔名
+  const cleanId = id.replace(/\.md$/, '');
   const [year, month] = cleanId.split('/');
-  // 去掉 M (大小寫通吃)
   return `/${year}/monthly/${month.replace(/[mM]/, '')}/`;
 }
 ---
@@ -52,7 +46,6 @@ function getMonthlyUrl(id: string) {
       <ul>
         {allDaily.map((post) => (
           <li>
-            {/* 修正：傳入 post.id */}
             <a href={getDailyUrl(post.id)}>
               {post.data.title}
             </a>
@@ -66,7 +59,6 @@ function getMonthlyUrl(id: string) {
       <ul>
         {allWeekly.map((post) => (
           <li>
-            {/* 修正：傳入 post.id */}
             <a href={getWeeklyUrl(post.id)}>{post.data.title}</a>
           </li>
         ))}
@@ -78,7 +70,6 @@ function getMonthlyUrl(id: string) {
       <ul>
         {allMonthly.map((post) => (
           <li>
-            {/* 修正：傳入 post.id */}
             <a href={getMonthlyUrl(post.id)}>{post.data.title}</a>
           </li>
         ))}
@@ -116,7 +107,7 @@ function getMonthlyUrl(id: string) {
 
     <h2>搜尋與彙整</h2>
     <p>
-      如需查詢歷史資料，可使用 <a href="/search/">搜尋頁面</a> 輸入日期，或是前往 <a href="https://github.com/carl0schen/stock-astro" target="_blank" rel="nofollow noopener noreferrer">GitHub</a> 直接檢視原始檔案。
+      如需查詢歷史資料，請到 <a href="/search/">搜尋頁面</a> 輸入關鍵字，或是前往 <a href="https://github.com/carl0schen/stock-astro" target="_blank" rel="nofollow noopener noreferrer">GitHub</a> 直接檢視原始檔案。
     </p>
 
     <h2>聯絡我們</h2>
@@ -139,37 +130,33 @@ function getMonthlyUrl(id: string) {
 </Layout>
 
 <style>
-  /* 1. H1 (主標題)：保留底線，控制大小 */
   h1 {
     font-size: 1.8rem;
-    border-bottom: 2px solid #eaeaea; /* 保留這條優雅的底線 */
+    border-bottom: 2px solid #eaeaea;
     padding-bottom: 0.5rem;
     margin-top: 0;
     color: #24292e;
   }
 
-  /* 2. H2 (副標題)：強制拔除被 GitHub CSS 賦予的底線！ */
   h2 {
-    border-bottom: none; /* 關鍵魔法：拔除底線 */
-    padding-bottom: 0;   /* 順便把 GitHub 預設留的底線內距歸零 */
+    border-bottom: none;
+    padding-bottom: 0;
     font-size: 1.3rem;
     margin-top: 1.5rem;
     margin-bottom: 0.8rem;
     font-weight: 600;
   }
 
-  /* 動態列表的樣式 */
   .latest-posts {
     display: grid;
     grid-template-columns: 1fr;
     gap: 1.5rem;
     margin: 2rem 0;
-    background-color: #f6f8fa; /* 淺灰背景區隔 */
+    background-color: #f6f8fa;
     padding: 1.5rem;
     border-radius: 6px;
   }
 
-  /* 桌機版變成三欄 */
   @media (min-width: 768px) {
     .latest-posts {
       grid-template-columns: repeat(3, 1fr);
@@ -201,12 +188,10 @@ function getMonthlyUrl(id: string) {
     border-top: 1px solid #eaeaea;
   }
 
-  /* 新增：修正首頁灰色區塊的標題上方間距 */
   .latest-posts h2 {
     margin-top: 0;
   }
 
-  /* 新增(選用)：讓最後一篇文章的底部也不要留白，這樣上下就完全對稱了 */
   .post-group li:last-child {
     margin-bottom: 0;
   }

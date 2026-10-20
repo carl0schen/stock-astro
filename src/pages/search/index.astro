@@ -28,6 +28,10 @@ import Layout from '../../layouts/Layout.astro';
       <button id="loadMoreBtn" class="load-more-btn" style="display: none;">載入更多</button>
     </div>
   </div>
+
+  <button id="back-to-top" class="back-to-top" aria-label="回到頂部">
+      ↑
+  </button>
 </Layout>
 
 <script is:inline>
@@ -173,6 +177,20 @@ import Layout from '../../layouts/Layout.astro';
   if (searchInput) {
     searchInput.addEventListener('keypress', function(event) {
       if (event.key === 'Enter') performSearch();
+    });
+  }
+
+  const backToTopBtn = document.getElementById('back-to-top');
+  if (backToTopBtn) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        backToTopBtn.classList.add('show');
+      } else {
+        backToTopBtn.classList.remove('show');
+      }
+    });
+    backToTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
 </script>
@@ -357,6 +375,48 @@ import Layout from '../../layouts/Layout.astro';
     .info-text {
       font-size: 0.9rem;
       padding: 1rem;
+    }
+  }
+
+  .back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    background-color: #0366d6;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .back-to-top.show {
+    opacity: 0.9;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  .back-to-top:hover {
+    background-color: #024ea4;
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+  @media (max-width: 768px) {
+    .back-to-top {
+      width: 3rem;
+      height: 3rem;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      font-size: 1.2rem;
     }
   }
 </style>

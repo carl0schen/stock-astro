@@ -9,7 +9,6 @@ export async function getStaticPaths() {
   const sortedPosts = allPosts.sort((a, b) => a.id.localeCompare(b.id));
 
   return sortedPosts.map((post, index) => {
-    // 清除 .md 後再解析
     const cleanId = post.id.replace(/\.md$/, '');
     const parts = cleanId.split('/');
     const year = parts[0];
@@ -38,7 +37,9 @@ function getUrl(id: string) {
 ---
 
 <Layout title={post.data.title} date={post.data.date}>
-  <Content />
+  <main data-pagefind-body>
+    <Content />
+  </main>
 
   <div class="post-nav">
     <div>

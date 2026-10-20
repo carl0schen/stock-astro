@@ -1,6 +1,5 @@
 ---
 // src/pages/[year]/[month]/[day]/index.astro
-// 1. 引入 render 函式
 import { getCollection, render } from 'astro:content';
 import Layout from '../../../../layouts/Layout.astro';
 
@@ -10,7 +9,6 @@ export async function getStaticPaths() {
   const sortedPosts = allPosts.sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf());
 
   return sortedPosts.map((post, index) => {
-    // 2. 把 .md 拿掉，取得乾淨的網址結構
     const cleanId = post.id.replace(/\.md$/, '');
     const [year, month, day] = cleanId.split('/');
 
@@ -25,10 +23,8 @@ export async function getStaticPaths() {
 }
 
 const { post, prevPost, nextPost } = Astro.props;
-// 3. 改用新的 render API
 const { Content } = await render(post);
 
-// 4. 輔助函式改吃 id，並清除 .md
 function getUrl(id: string) {
   const cleanId = id.replace(/\.md$/, '');
   return `/${cleanId}/`;
@@ -36,7 +32,9 @@ function getUrl(id: string) {
 ---
 
 <Layout title={post.data.title} date={post.data.date}>
-  <Content />
+  <main data-pagefind-body>
+    <Content />
+  </main>
 
   <div class="post-nav">
     <div>

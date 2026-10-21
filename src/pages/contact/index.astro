@@ -5,111 +5,104 @@ import Layout from '../../layouts/Layout.astro';
 
 <Layout
     title="聯絡我們"
-    description="如果您對本站的法人買賣超數據有疑問，或發現資料錯誤，歡迎透過此頁面聯絡站長。"
+    description="如果您對本站的法人買賣超數據有疑問，或發現資料錯誤，歡迎透過此頁面聯絡我們。"
 >
-  <div class="form-wrapper">
-    <div class="form-container">
-      <h1>聯絡我們</h1>
-      <p class="info-text">如果資料有誤，歡迎透過下方表單聯繫。</p>
+  <div class="contact-page-container">
+    <h1 class="page-title">聯絡我們</h1>
 
-      <form id="contact-form" action="https://api.staticforms.dev/submit" method="POST">
+    <p class="info-text">
+      <strong>✉️ 有話想對我們說嗎？</strong><br>
+      如果對本站的法人買賣超數據有疑問，或發現資料錯誤，歡迎透過下方表單聯絡我們。<br>
+      我們收到訊息後會盡快處理！
+    </p>
 
-          <input type="hidden" name="accessKey" value="sf_2f7f5630gckb73dd6g1g2jmd">
-          <input type="hidden" name="subject" value="來自 stock.may.tw 的新聯絡訊息">
+    <form id="contact-form" action="https://api.staticforms.dev/submit" method="POST">
+        <input type="hidden" name="accessKey" value="sf_2f7f5630gckb73dd6g1g2jmd">
+        <input type="hidden" name="subject" value="來自 stock.may.tw 的新聯絡訊息">
 
-          <div class="ohnohoney">
-              <label for="honeypot">請勿填寫此欄位</label>
-              <input type="text" id="honeypot" name="honeypot" autocomplete="off">
-          </div>
+        <div class="ohnohoney">
+            <label for="honeypot">請勿填寫此欄位</label>
+            <input type="text" id="honeypot" name="honeypot" autocomplete="off">
+        </div>
 
-          <div class="form-group">
-              <label for="name" class="form-label">名稱 <span class="required-mark">*</span></label>
-              <input type="text" id="name" name="name" class="form-input" placeholder="您的名稱" required>
-          </div>
+        <div class="form-group">
+            <label for="name" class="form-label">名稱 <span class="required-mark">*</span></label>
+            <input type="text" id="name" name="name" class="form-input" placeholder="您的名稱" required>
+        </div>
 
-          <div class="form-group">
-              <label for="email" class="form-label">電子信箱 <span class="required-mark">*</span></label>
-              <input type="email" id="email" name="email" class="form-input" placeholder="name@example.com" required>
-          </div>
+        <div class="form-group">
+            <label for="email" class="form-label">電子信箱 <span class="required-mark">*</span></label>
+            <input type="email" id="email" name="email" class="form-input" placeholder="name@example.com" required>
+        </div>
 
-          <div class="form-group">
-              <label for="message" class="form-label">訊息內容 <span class="required-mark">*</span></label>
-              <textarea id="message" name="message" class="form-textarea" placeholder="請輸入您的訊息..." required></textarea>
-          </div>
+        <div class="form-group">
+            <label for="message" class="form-label">訊息內容 <span class="required-mark">*</span></label>
+            <textarea id="message" name="message" class="form-textarea" placeholder="請輸入您的訊息..." required></textarea>
+        </div>
 
+        <div class="submit-wrapper">
           <button type="submit" id="submit-btn" class="submit-button">送出訊息</button>
+        </div>
 
-          <div id="form-message" class="form-message" role="status" aria-live="polite" style="display: none;"></div>
-      </form>
-    </div>
+        <div id="form-message" class="form-message" role="status" aria-live="polite" style="display: none;"></div>
+    </form>
   </div>
 </Layout>
 
 <script>
-  // 新增：攔截表單送出的非同步邏輯
   const form = document.getElementById('contact-form') as HTMLFormElement;
   const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
   const formMessage = document.getElementById('form-message') as HTMLDivElement;
 
   if (form) {
     form.addEventListener('submit', async (e) => {
-      e.preventDefault(); // 阻止瀏覽器預設的跳轉行為
+      e.preventDefault();
 
-      // 1. 改變按鈕狀態，防止重複點擊
       submitBtn.disabled = true;
       submitBtn.textContent = '傳送中...';
       submitBtn.style.opacity = '0.7';
       formMessage.style.display = 'none';
-      formMessage.className = 'form-message'; // 重置 class
+      formMessage.className = 'form-message';
 
-      // 2. 收集表單資料
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
 
-      try { // 這裡開始 try
-        // 3. 呼叫 staticforms API
+      try {
         const response = await fetch(form.action, {
           method: 'POST',
           body: JSON.stringify(data),
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json' // 告訴伺服器我們想要 JSON 回應，不要跳轉
+            'Accept': 'application/json'
           }
         });
 
         const result = await response.json();
 
-        // 4. 處理回傳結果
         if (result.success) {
           formMessage.textContent = '✓ 訊息已成功送出！感謝您的聯繫。';
           formMessage.classList.add('success');
           formMessage.style.display = 'block';
-          form.reset(); // 清空表單
+          form.reset();
 
-          // 新增：6 秒後開始「淡出」動畫
           setTimeout(() => {
-            formMessage.classList.add('fade-out'); // 加上淡出的 CSS class
-
-            // 等淡出動畫跑完 (0.5秒) 後，再真正把元素隱藏並重置狀態
+            formMessage.classList.add('fade-out');
             setTimeout(() => {
               formMessage.style.display = 'none';
               formMessage.classList.remove('success', 'error', 'fade-out');
             }, 500);
-
-          }, 6000); // 6秒後觸發
+          }, 6000);
 
         } else {
           formMessage.textContent = '送出失敗，請檢查內容或稍後再試。';
           formMessage.classList.add('error');
           formMessage.style.display = 'block';
-          // 註：錯誤訊息通常不設定自動消失，讓使用者有時間閱讀
         }
       } catch (error) {
         formMessage.textContent = '網路連線異常，請稍後再試。';
         formMessage.classList.add('error');
         formMessage.style.display = 'block';
       } finally {
-        // 5. 恢復按鈕狀態
         submitBtn.disabled = false;
         submitBtn.textContent = '送出訊息';
         submitBtn.style.opacity = '1';
@@ -119,73 +112,88 @@ import Layout from '../../layouts/Layout.astro';
 </script>
 
 <style>
-  /* H1 (主標題)：保留底線，控制大小 */
-  h1 {
-    font-size: 1.8rem;
-    border-bottom: 2px solid #eaeaea; /* 保留這條優雅的底線 */
-    padding-bottom: 0.5rem;
+  .contact-page-container {
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 2em 1rem 4em 1rem;
+  }
+
+  .page-title {
+    font-size: 1.8em;
+    text-align: center;
+    border-bottom: 2px solid #eaeaea;
+    padding-bottom: 0.5em;
     margin-top: 0;
+    margin-bottom: 1.5em;
     color: #24292e;
   }
 
-  /* --- 保持原本上半部的樣式不變 --- */
-  .form-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 60vh;
+  .info-text {
+    font-size: 0.95rem;
+    color: #444;
+    background-color: #f6f8fa;
+    padding: 1.2rem 1.5rem;
+    border-radius: 6px;
+    margin-bottom: 2.5rem;
+    text-align: left;
+    line-height: 1.8;
+  }
+  .info-text strong {
+    color: #0366d6;
   }
 
-  .form-container {
-    text-align: center;
-    padding: 2.5rem;
-    background-color: #f8f9fa;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    width: 100%;
-    max-width: 400px;
-    box-sizing: border-box; /* 防止 padding 撐爆寬度 */
+  .form-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
   }
-
-  @media (max-width: 480px) {
-    .form-container {
-      padding: 1.5rem;
-    }
+  .form-label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
   }
-
-  .form-group { margin-bottom: 1rem; text-align: left; }
-  .form-label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; color: #333; }
   .required-mark { color: #d73a49; }
 
   .form-input, .form-textarea {
     width: 100%;
-    padding: 0.8rem;
-    font-size: 1rem;
+    padding: 0.9rem 1.2rem;
+    font-size: 1.1rem;
     border: 1px solid #ccc;
     border-radius: 6px;
     box-sizing: border-box;
     font-family: inherit;
+    background-color: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
 
-  .form-textarea { height: 120px; resize: vertical; }
+  .form-textarea {
+    height: 150px;
+    resize: vertical;
+  }
 
   .form-input:focus, .form-textarea:focus {
     border-color: #0366d6;
+    box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.1);
     outline: none;
   }
 
+  .submit-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 2.5rem;
+  }
+
   .submit-button {
-    width: 100%;
-    padding: 0.8rem;
-    font-size: 1rem;
+    padding: 0.9rem 3rem;
+    font-size: 1.1rem;
     background-color: #0366d6;
     color: white;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
-    margin-top: 0.5rem;
-    transition: all 0.2s;
+    transition: background-color 0.2s;
   }
   .submit-button:hover { background-color: #024ea4; }
   .submit-button:disabled { cursor: not-allowed; }
@@ -200,7 +208,6 @@ import Layout from '../../layouts/Layout.astro';
     z-index: -1;
   }
 
-  /* 新增：提示訊息框的樣式 */
   .form-message {
     margin-top: 1.5rem;
     padding: 1rem;
@@ -208,6 +215,7 @@ import Layout from '../../layouts/Layout.astro';
     font-size: 0.95rem;
     font-weight: 500;
     animation: fadeIn 0.3s ease-in;
+    text-align: center;
   }
 
   .form-message.success {
@@ -227,7 +235,6 @@ import Layout from '../../layouts/Layout.astro';
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* 新增：淡出動畫的專屬 class 與 keyframes */
   .form-message.fade-out {
     animation: fadeOut 0.5s ease-out forwards;
   }
@@ -235,5 +242,11 @@ import Layout from '../../layouts/Layout.astro';
   @keyframes fadeOut {
     from { opacity: 1; transform: translateY(0); }
     to { opacity: 0; transform: translateY(-5px); }
+  }
+
+  @media (max-width: 480px) {
+    .submit-button {
+      width: 100%;
+    }
   }
 </style>

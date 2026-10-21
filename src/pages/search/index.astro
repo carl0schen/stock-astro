@@ -13,7 +13,7 @@ import Layout from '../../layouts/Layout.astro';
       <strong>🔍 找報表？輸入日期自動跳轉：</strong><br>
       支援格式：20261019、2026/10/19、2026年10月19日、2026W42、2026M09<br><br>
       <strong>🔍 找全文？使用關鍵字搜尋：</strong><br>
-      輸入關鍵字全文搜尋（例如：台積電、"2026年10月19日"、PCB）。
+      輸入關鍵字全文搜尋（例如：台積電、"2026年10月19日"、PCB），將從最新日期開始排列。
     </p>
 
     <div class="search-bar-wrapper">
@@ -113,7 +113,9 @@ import Layout from '../../layouts/Layout.astro';
       await pagefind.init();
       await pagefind.options({ excerptLength: 100 });
 
-      const search = await pagefind.search(query);
+      const search = await pagefind.search(query, {
+        sort: { date: "desc" }
+      });
       allResults = search.results;
       currentPage = 0;
 
@@ -125,7 +127,7 @@ import Layout from '../../layouts/Layout.astro';
     } catch (e) {
       console.error(e);
       if (errorMsg) {
-        errorMsg.textContent = '無法載入搜尋引擎，請確保網站已完成靜態建置。';
+        errorMsg.textContent = '無法載入搜尋引擎，請確認網站已完成靜態建置。';
         errorMsg.style.display = 'block';
       }
     } finally {
@@ -218,7 +220,6 @@ import Layout from '../../layouts/Layout.astro';
     background-color: #f6f8fa;
     padding: 1.2rem 1.5rem;
     border-radius: 6px;
-    border: 1px solid #e1e4e8;
     margin-bottom: 2.5rem;
     text-align: left;
     line-height: 1.8;

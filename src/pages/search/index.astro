@@ -13,7 +13,7 @@ import Layout from '../../layouts/Layout.astro';
       <strong>🔍 找報表？輸入日期自動跳轉：</strong><br>
       支援格式：20261019、2026/10/19、2026年10月19日、2026W42、2026M09<br><br>
       <strong>🔍 找全文？使用關鍵字搜尋：</strong><br>
-      輸入關鍵字全文搜尋（例如：台積電、"2026年10月19日"、PCB），將從最新日期開始排列。
+      輸入關鍵字全文搜尋（例如：台積電、PCB），將從最新日期開始排列。
     </p>
 
     <div class="search-bar-wrapper">
@@ -46,68 +46,35 @@ import Layout from '../../layouts/Layout.astro';
   const resultsList = document.getElementById('resultsList');
   const resultCount = document.getElementById('resultCount');
   const loadMoreBtn = document.getElementById('loadMoreBtn');
+  const backToTopBtn = document.getElementById('back-to-top');
 
   let allResults = [];
   let currentPage = 0;
   const RESULTS_PER_PAGE = 15;
+  let effectiveQueryString = "";
+  let originalQueryString = "";
 
   async function performSearch() {
     if (!searchInput) return;
-    const query = searchInput.value.trim();
-    const formatQuery = query.toUpperCase();
 
-    if (!query) {
-      if (errorMsg) {
-        errorMsg.textContent = '請輸入搜尋關鍵字！';
-        errorMsg.style.display = 'block';
-      }
+    const rawQuery = searchInput.value.replace(/["']/g, '').trim();
+    const formatQuery = rawQuery.toUpperCase();
+
+    if (!rawQuery) {
+      if (errorMsg) { errorMsg.textContent = '請輸入搜尋關鍵字！'; errorMsg.style.display = 'block'; }
       return;
     }
-
     if (errorMsg) errorMsg.style.display = 'none';
 
-    if (/^\d{8}$/.test(formatQuery)) {
-      const y = formatQuery.substring(0, 4);
-      const m = formatQuery.substring(4, 6);
-      const d = formatQuery.substring(6, 8);
-      window.location.href = `/${y}/${m}/${d}/`;
-      return;
-    } else if (/^\d{4}W\d{1,2}$/.test(formatQuery)) {
-      const y = formatQuery.substring(0, 4);
-      const w = formatQuery.substring(formatQuery.indexOf('W') + 1);
-      window.location.href = `/${y}/weekly/${w}/`;
-      return;
-    } else if (/^\d{4}M\d{1,2}$/.test(formatQuery)) {
-      const y = formatQuery.substring(0, 4);
-      const m = formatQuery.substring(formatQuery.indexOf('M') + 1);
-      window.location.href = `/${y}/monthly/${m}/`;
-      return;
-    }
-
+    if (/^\d{8}$/.test(formatQuery)) { window.location.href = `/${formatQuery.substring(0, 4)}/${formatQuery.substring(4, 6)}/${formatQuery.substring(6, 8)}/`; return; }
+    else if (/^\d{4}W\d{1,2}$/.test(formatQuery)) { window.location.href = `/${formatQuery.substring(0, 4)}/weekly/${formatQuery.substring(formatQuery.indexOf('W') + 1)}/`; return; }
+    else if (/^\d{4}M\d{1,2}$/.test(formatQuery)) { window.location.href = `/${formatQuery.substring(0, 4)}/monthly/${formatQuery.substring(formatQuery.indexOf('M') + 1)}/`; return; }
     const naturalDaily = formatQuery.match(/^(\d{4})[年\/\-\s]+0?(\d{1,2})[月\/\-\s]+0?(\d{1,2})[日號]?$/);
-    if (naturalDaily) {
-      const y = naturalDaily[1];
-      const m = naturalDaily[2].padStart(2, '0');
-      const d = naturalDaily[3].padStart(2, '0');
-      window.location.href = `/${y}/${m}/${d}/`;
-      return;
-    }
-
+    if (naturalDaily) { window.location.href = `/${naturalDaily[1]}/${naturalDaily[2].padStart(2, '0')}/${naturalDaily[3].padStart(2, '0')}/`; return; }
     const naturalMonthly = formatQuery.match(/^(\d{4})[年\/\-\s]+0?(\d{1,2})月?$/);
-    if (naturalMonthly) {
-      const y = naturalMonthly[1];
-      const m = naturalMonthly[2].padStart(2, '0');
-      window.location.href = `/${y}/monthly/${m}/`;
-      return;
-    }
-
+    if (naturalMonthly) { window.location.href = `/${naturalMonthly[1]}/monthly/${naturalMonthly[2].padStart(2, '0')}/`; return; }
     const naturalWeekly = formatQuery.match(/^(\d{4})[年\s]*第?(\d{1,2})[週周]$/);
-    if (naturalWeekly) {
-      const y = naturalWeekly[1];
-      const w = naturalWeekly[2];
-      window.location.href = `/${y}/weekly/${w}/`;
-      return;
-    }
+    if (naturalWeekly) { window.location.href = `/${naturalWeekly[1]}/weekly/${naturalWeekly[2]}/`; return; }
 
     if (searchBtn) searchBtn.textContent = '搜尋中...';
 
@@ -115,12 +82,43 @@ import Layout from '../../layouts/Layout.astro';
       const pagefindUrl = window.location.origin + "/pagefind/pagefind.js";
       const pagefind = await import(/* @vite-ignore */ pagefindUrl);
       await pagefind.init();
-      await pagefind.options({ excerptLength: 100 });
+      await pagefind.options({ excerptLength: 100, chunkSize: 100, chunkOverlap: 20 });
 
-      const search = await pagefind.search(query, {
-        sort: { date: "desc" }
-      });
-      allResults = search.results;
+      let search = await pagefind.search(rawQuery, { sort: { date: "desc" } });
+      let finalResults = search.results;
+
+      effectiveQueryString = rawQuery;
+      originalQueryString = rawQuery;
+
+      if (finalResults.length <= 1 && rawQuery.length >= 3 && !/^\d+$/.test(rawQuery)) {
+        const prefix = rawQuery.substring(0, 3);
+        let fallbackFront = await pagefind.search(prefix, { sort: { date: "desc" } });
+
+        const suffix = rawQuery.substring(rawQuery.length - 2);
+        let fallbackBack = await pagefind.search(suffix, { sort: { date: "desc" } });
+
+        let bestFallback = fallbackFront.results.length >= fallbackBack.results.length
+                           ? { res: fallbackFront.results, q: prefix }
+                           : { res: fallbackBack.results, q: suffix };
+
+        if (bestFallback.res.length > finalResults.length) {
+            finalResults = bestFallback.res;
+            effectiveQueryString = bestFallback.q;
+        }
+      }
+
+      let filteredResults = [];
+      if (effectiveQueryString !== originalQueryString) {
+          const allData = await Promise.all(finalResults.map(r => r.data()));
+          filteredResults = finalResults.filter((_, index) => {
+              const content = allData[index].content;
+              return content && content.includes(originalQueryString);
+          });
+      } else {
+          filteredResults = finalResults;
+      }
+
+      allResults = filteredResults;
       currentPage = 0;
 
       if (resultsList) resultsList.innerHTML = '';
@@ -130,10 +128,7 @@ import Layout from '../../layouts/Layout.astro';
       await renderResults();
     } catch (e) {
       console.error(e);
-      if (errorMsg) {
-        errorMsg.textContent = '無法載入搜尋引擎，請確認網站已完成靜態建置。';
-        errorMsg.style.display = 'block';
-      }
+      if (errorMsg) { errorMsg.textContent = '無法載入搜尋引擎，請確認網站已完成靜態建置。'; errorMsg.style.display = 'block'; }
     } finally {
       if (searchBtn) searchBtn.textContent = '搜尋';
     }
@@ -149,44 +144,76 @@ import Layout from '../../layouts/Layout.astro';
         const data = await result.data();
         const itemDiv = document.createElement('div');
         itemDiv.className = 'news-item';
-
         let innerHTML = `<a href="${data.url}" class="news-title-link"><h2>${data.meta.title || '無標題'}</h2></a>`;
+        let customExcerpts = [];
 
-        if (data.sub_results && data.sub_results.length > 0) {
-          innerHTML += `<div class="excerpts-wrapper">`;
-          for (const sub of data.sub_results) {
-             if (!sub.excerpt) continue;
-             innerHTML += `<p class="news-summary">${sub.excerpt}...</p>`;
-          }
-          innerHTML += `</div>`;
-        } else {
-          innerHTML += `<div class="excerpts-wrapper"><p class="news-summary">${data.excerpt}...</p></div>`;
+        if (data.content && originalQueryString.length > 0) {
+            const blocks = data.content.split(/\n|。/);
+
+            let matchedBlocks = blocks.filter(b => b.includes(originalQueryString)).map(b => b.trim()).filter(b => b.length > 0);
+            if (matchedBlocks.length === 0) {
+                matchedBlocks = blocks.filter(b => b.includes(effectiveQueryString)).map(b => b.trim()).filter(b => b.length > 0);
+            }
+
+            const uniqueBlocks = [...new Set(matchedBlocks)].slice(0, 5);
+
+            for (let block of uniqueBlocks) {
+                if (block.length > 250) {
+                    const firstTerm = block.includes(originalQueryString) ? originalQueryString : effectiveQueryString;
+                    const idx = block.indexOf(firstTerm);
+                    const startIdx = Math.max(0, idx - 100);
+                    const endIdx = Math.min(block.length, idx + 100);
+                    block = (startIdx > 0 ? '...' : '') + block.substring(startIdx, endIdx) + (endIdx < block.length ? '...' : '');
+                }
+
+                let termsToHighlight = [originalQueryString, effectiveQueryString];
+                termsToHighlight = [...new Set(termsToHighlight)].sort((a, b) => b.length - a.length);
+
+                termsToHighlight.forEach(term => {
+                    if (term && term.length > 0) {
+                        const safeTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        const regex = new RegExp(`(${safeTerm})(?![^<]*>)`, 'gi');
+                        block = block.replace(regex, '<mark>$1</mark>');
+                    }
+                });
+                customExcerpts.push(block);
+            }
         }
 
+        innerHTML += `<div class="excerpts-wrapper">`;
+        if (customExcerpts.length > 0) {
+          for (const excerpt of customExcerpts) { innerHTML += `<p class="news-summary">${excerpt}</p>`; }
+        } else {
+          innerHTML += `<p class="news-summary">${data.excerpt || '點擊標題查看完整內容...'}</p>`;
+        }
+        innerHTML += `</div>`;
         itemDiv.innerHTML = innerHTML;
         resultsList.appendChild(itemDiv);
       }
     }
 
     if (loadMoreBtn) {
-      if (end < allResults.length) {
-        loadMoreBtn.style.display = 'block';
-        currentPage++;
-      } else {
-        loadMoreBtn.style.display = 'none';
-      }
+      loadMoreBtn.style.display = end < allResults.length ? 'block' : 'none';
+      if (end < allResults.length) currentPage++;
     }
   }
 
   if (searchBtn) searchBtn.addEventListener('click', performSearch);
   if (loadMoreBtn) loadMoreBtn.addEventListener('click', renderResults);
+
   if (searchInput) {
-    searchInput.addEventListener('keypress', function(event) {
-      if (event.key === 'Enter') performSearch();
-    });
+    searchInput.addEventListener('keypress', function(event) { if (event.key === 'Enter') performSearch(); });
+    if (clearBtn) {
+      searchInput.addEventListener('input', () => { clearBtn.style.display = searchInput.value.length > 0 ? 'block' : 'none'; });
+      clearBtn.addEventListener('click', () => { searchInput.value = '';
+      clearBtn.style.display = 'none';
+      searchInput.focus();
+      if (resultsWrapper) resultsWrapper.style.display = 'none';
+      if (resultsList) resultsList.innerHTML = '';
+      });
+    }
   }
 
-  const backToTopBtn = document.getElementById('back-to-top');
   if (backToTopBtn) {
     window.addEventListener('scroll', () => {
       if (window.scrollY > 300) {
@@ -197,20 +224,6 @@ import Layout from '../../layouts/Layout.astro';
     });
     backToTopBtn.addEventListener('click', () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-  }
-
-  if (searchInput && clearBtn) {
-    searchInput.addEventListener('input', () => {
-      clearBtn.style.display = searchInput.value.length > 0 ? 'block' : 'none';
-    });
-
-    clearBtn.addEventListener('click', () => {
-      searchInput.value = '';
-      clearBtn.style.display = 'none';
-      searchInput.focus();
-      if (resultsWrapper) resultsWrapper.style.display = 'none';
-      if (resultsList) resultsList.innerHTML = '';
     });
   }
 </script>

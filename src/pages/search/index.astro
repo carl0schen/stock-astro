@@ -182,9 +182,16 @@ import Layout from '../../layouts/Layout.astro';
 
         innerHTML += `<div class="excerpts-wrapper">`;
         if (customExcerpts.length > 0) {
-          for (const excerpt of customExcerpts) { innerHTML += `<p class="news-summary">${excerpt}</p>`; }
+          for (const excerpt of customExcerpts) {
+            const finalExcerpt = excerpt.endsWith('...') ? excerpt : excerpt + '...';
+            innerHTML += `<p class="news-summary">${finalExcerpt}</p>`;
+          }
         } else {
-          innerHTML += `<p class="news-summary">${data.excerpt || '點擊標題查看完整內容...'}</p>`;
+          let fallbackExcerpt = data.excerpt || '點擊標題查看完整內容...';
+          if (fallbackExcerpt !== '點擊標題查看完整內容...' && !fallbackExcerpt.endsWith('...')) {
+            fallbackExcerpt += '...';
+          }
+          innerHTML += `<p class="news-summary">${fallbackExcerpt}</p>`;
         }
         innerHTML += `</div>`;
         itemDiv.innerHTML = innerHTML;

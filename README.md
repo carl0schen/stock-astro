@@ -19,11 +19,11 @@
 
 ### 搜尋與彙整
 
-如需查詢歷史資料，請到 [搜尋頁面](https://stock.may.tw/search/) 輸入關鍵字，或是前往 [GitHub](https://github.com/carl0schen/stock-astro) 直接檢視原始檔案。
+如需查詢歷史資料，請到 [搜尋頁面](https://stock.may.tw/search/) 或是前往 [GitHub](https://github.com/carl0schen/stock-astro) 檢視原始檔案。
 
 ### 聯絡我們
 
-如果資料有誤，歡迎來信告知：[聯絡頁面](https://stock.may.tw/contact/)
+如果資料有誤，歡迎 [來信告知](https://stock.may.tw/contact/)。
 
 ### 文章訂閱
 

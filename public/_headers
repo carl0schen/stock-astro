@@ -1,5 +1,6 @@
 /*
-  ! Access-Control-Allow-Origin
   X-Frame-Options: DENY
+  Content-Security-Policy: frame-ancestors 'none';
+
 /rss.xml
   Cache-Control: no-cache, no-store, must-revalidate, max-age=0
